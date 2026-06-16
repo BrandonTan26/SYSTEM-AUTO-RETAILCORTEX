@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Klerek Dashboard — T939 POS Monitor</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2234;
+  --bg-card-hover: #1f2940;
+  --border-color: #2a3550;
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-green: #10b981;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-cyan: #06b6d4;
+}
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+.app-wrapper { display: flex; min-height: 100vh; flex-direction: column; }
+.sidebar {
+  width: 260px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+  transition: transform 0.3s;
+}
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 14px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.content-area { padding: 24px; flex: 1; }
+
+.app-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 20px 24px;
+  text-align: center;
+  margin-top: auto;
+}
+.footer-content { max-width: 800px; margin: 0 auto; }
+.footer-brand { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+.footer-tagline { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+.footer-version { font-size: 10px; color: var(--text-secondary); }
+
+.brand-logo {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-logo .logo-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 20px;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+.brand-logo .brand-text h5 { margin: 0; font-size: 15px; font-weight: 700; }
+.brand-logo .brand-text small { color: var(--text-muted); font-size: 11px; }
+
+.nav-menu { padding: 16px 12px; }
+.nav-section-title {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(59,130,246,0.15), transparent);
+  color: var(--accent-blue);
+  border-left: 3px solid var(--accent-blue);
+  padding-left: 11px;
+}
+.nav-item i { font-size: 16px; width: 20px; }
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+.stat-card.green::before { background: var(--accent-green); }
+.stat-card.blue::before { background: var(--accent-blue); }
+.stat-card.purple::before { background: var(--accent-purple); }
+.stat-card.orange::before { background: var(--accent-orange); }
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.stat-card .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 14px; }
+.stat-card .stat-label { color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-card .stat-value { font-size: 24px; font-weight: 700; color: var(--text-primary); line-height: 1.2; font-variant-numeric: tabular-nums; }
+.stat-card .stat-sub { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
+
+.data-table { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+.data-table .table { color: var(--text-primary); margin: 0; }
+.data-table .table thead th { background: var(--bg-secondary); color: var(--text-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+.data-table .table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px; vertical-align: middle; }
+.data-table .table tbody tr:hover { background: var(--bg-card-hover); }
+.data-table .table tbody tr:last-child td { border-bottom: none; }
+
+.badge-soft { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.badge-green { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+.badge-purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+.badge-orange { background: rgba(245,158,11,0.15); color: var(--accent-orange); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+.badge-cyan { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+.badge-gray { background: rgba(107,114,128,0.15); color: var(--text-secondary); }
+
+.btn-custom { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+.btn-custom:hover { background: var(--bg-card-hover); border-color: var(--accent-blue); color: var(--text-primary); }
+.btn-primary-custom { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+.btn-primary-custom:hover { opacity: 0.9; color: white; }
+
+.upload-zone { background: var(--bg-card); border: 2px dashed var(--border-color); border-radius: 16px; padding: 60px 30px; text-align: center; transition: all 0.3s; cursor: pointer; }
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--accent-blue); background: rgba(59,130,246,0.05); }
+.upload-zone .upload-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; color: white; }
+
+.loading-screen { position: fixed; inset: 0; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; gap: 20px; }
+.spinner-custom { width: 60px; height: 60px; border: 4px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.chart-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; height: 100%; }
+.chart-box h6 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 16px; }
+
+.modal-custom .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); }
+.modal-custom .modal-header { border-bottom: 1px solid var(--border-color); }
+.modal-custom .modal-footer { border-top: 1px solid var(--border-color); }
+.modal-custom .btn-close { filter: invert(1); }
+
+.receipt-container { background: white; color: #000; font-family: 'Courier New', monospace; padding: 20px; max-width: 320px; margin: 0 auto; font-size: 12px; line-height: 1.5; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.receipt-container pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-family: inherit; font-size: 11px; line-height: 1.4; }
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+.login-box {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.login-header { text-align: center; margin-bottom: 30px; }
+.login-header .login-icon {
+  width: 70px; height: 70px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: white; font-size: 32px; margin-bottom: 16px;
+}
+.login-header h2 { color: #1e293b; margin: 0 0 8px 0; font-weight: 800; font-size: 24px; }
+.login-header p { color: #64748b; margin: 0; font-size: 14px; }
+
+.form-control-login {
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.3s;
+  width: 100%;
+}
+.form-control-login:focus {
+  background: white;
+  border-color: var(--accent-blue);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+}
+
+.btn-login {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border: none;
+  color: white;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-login:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59,130,246,0.3); }
+.btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+  font-size: 13px;
+  text-align: center;
+  border: 1px solid #fecaca;
+}
+.error-message.show { display: block; animation: shake 0.4s; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Expired Screen */
+.expired-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 20px;
+}
+.expired-screen.show { display: flex; }
+.expired-box {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.expired-box .expired-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: white; font-size: 40px; margin-bottom: 20px;
+}
+.expired-box h2 { color: #1e293b; margin: 0 0 12px 0; font-weight: 800; }
+.expired-box p { color: #64748b; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; }
+.expired-box .expired-detail {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #991b1b;
+}
+.expired-box .contact-info {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #475569;
+}
+.expired-box .contact-info strong { color: #1e293b; }
+
+.rank-badge { width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+.rank-2 { background: linear-gradient(135deg, #9ca3af, #6b7280); color: white; }
+.rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
+.rank-other { background: var(--bg-secondary); color: var(--text-secondary); }
+
+@media (max-width: 992px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+}
+
+.text-money { font-variant-numeric: tabular-nums; font-weight: 600; }
+.clickable { cursor: pointer; }
+.mono { font-family: 'Courier New', monospace; }
+
+.kpi-hero {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%);
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+[data-theme="light"] .kpi-hero { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #6366f1 100%); }
+.kpi-hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%); border-radius: 50%; }
+.kpi-hero .kpi-label { font-size: 12px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi-hero .kpi-value { font-size: 32px; font-weight: 800; margin: 8px 0; font-variant-numeric: tabular-nums; }
+.kpi-hero .kpi-sub { font-size: 13px; opacity: 0.85; }
+
+.theme-toggle { width: 44px; height: 24px; background: var(--border-color); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; }
+.theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; }
+.theme-toggle.active { background: var(--accent-blue); }
+.theme-toggle.active::after { transform: translateX(20px); }
+
+.detail-item-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+.detail-item-row:last-child { border-bottom: none; }
+.detail-item-name { font-weight: 500; }
+.detail-item-qty { color: var(--text-muted); }
+.detail-item-price { font-weight: 600; color: var(--accent-green); }
+
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); } }
+
+/* Login spinner kecil */
+.login-spinner {
+  width: 20px; height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+}
+.btn-login.loading .login-spinner { display: inline-block; }
+.btn-login.loading .btn-text { display: none; }
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="login-icon"><i class="bi bi-database-fill-gear"></i></div>
+      <h2>Klerek Dashboard</h2>
+      <p>Silakan login untuk melanjutkan</p>
+    </div>
+    <div id="loginError" class="error-message">
+      <i class="bi bi-exclamation-circle-fill"></i> <span id="loginErrorText">Kode Toko atau PIN salah!</span>
+    </div>
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:8px;color:#475569;font-weight:600;font-size:14px">Kode Toko</label>
+        <input type="text" id="kodeToko" class="form-control-login" placeholder="Masukkan kode toko" required autocomplete="off">
+      </div>
+      <div style="margin-bottom:24px">
+        <label style="display:block;margin-bottom:8px;color:#475569;font-weight:600;font-size:14px">PIN</label>
+        <input type="password" id="pin" class="form-control-login" placeholder="Masukkan PIN" required>
+      </div>
+      <button type="submit" class="btn-login" id="btnLogin">
+        <div class="login-spinner"></div>
+        <span class="btn-text"><i class="bi bi-box-arrow-in-right"></i> Login</span>
+      </button>
+    </form>
+    <div style="text-align:center;margin-top:20px;color:#94a3b8;font-size:12px">
+      <i class="bi bi-shield-check"></i> Secure Login System • Powered by BrandRetailCortex
+    </div>
+  </div>
+</div>
+
+<!-- Expired / Suspended Screen -->
+<div id="expiredScreen" class="expired-screen">
+  <div class="expired-box">
+    <div class="expired-icon"><i class="bi bi-x-circle-fill"></i></div>
+    <h2>Akses Ditolak</h2>
+    <p id="expiredMessage">Masa sewa Anda telah habis atau akun dinonaktifkan.</p>
+    <div class="expired-detail" id="expiredDetail">
+      <i class="bi bi-info-circle-fill"></i> Silakan hubungi admin untuk perpanjangan sewa.
+    </div>
+    <div class="contact-info">
+      <strong>📞 Hubungi Admin:</strong><br>
+      <span id="adminContact">WhatsApp: 0812-XXXX-XXXX</span>
+    </div>
+    <button class="btn-login" onclick="backToLogin()" style="background:linear-gradient(135deg,#64748b,#475569)">
+      <i class="bi bi-arrow-left"></i> Kembali ke Login
+    </button>
+  </div>
+</div>
+
+<!-- Loading Screen -->
+<div id="loadingScreen" class="loading-screen" style="display:none">
+  <div class="spinner-custom"></div>
+  <div style="text-align:center">
+    <h5 style="margin:0;font-weight:700">Klerek Dashboard</h5>
+    <small style="color:var(--text-muted)">Memuat engine SQLite...</small>
+  </div>
+</div>
+
+<!-- Upload Screen -->
+<div id="uploadScreen" style="display:none;min-height:100vh;align-items:center;justify-content:center;padding:20px">
+  <div style="max-width:600px;width:100%">
+    <div style="text-align:center;margin-bottom:30px">
+      <div style="width:70px;height:70px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:32px;margin-bottom:16px">
+        <i class="bi bi-database-fill-gear"></i>
+      </div>
+      <h2 style="font-weight:800;margin:0">Klerek Dashboard</h2>
+      <p style="color:var(--text-muted);margin-top:8px">Upload database SQLite POS Alfamart Anda</p>
+      <div id="welcomeInfo" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:16px;margin-top:20px;text-align:left">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Login sebagai:</div>
+        <div style="font-weight:700;font-size:15px" id="welcomeKode">-</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:8px;margin-bottom:4px">Masa Berlaku:</div>
+        <div style="font-weight:600;font-size:14px;color:var(--accent-green)" id="welcomeExpiry">-</div>
+      </div>
+    </div>
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+      <h5 style="font-weight:700">Drop file .db / .sqlite di sini</h5>
+      <p style="color:var(--text-muted);margin:8px 0 20px">atau klik untuk memilih file dari perangkat Anda</p>
+      <input type="file" id="fileInput" accept=".db,.sqlite" style="display:none">
+      <button class="btn btn-primary-custom" onclick="document.getElementById('fileInput').click()">
+        <i class="bi bi-folder2-open"></i> Pilih File Database
+      </button>
+      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">
+        Support: .db, .sqlite (SQLite3)
+      </div>
+    </div>
+    <div id="uploadProgress" style="display:none;margin-top:20px">
+      <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div class="spinner-custom" style="width:30px;height:30px;border-width:3px"></div>
+          <div>
+            <div style="font-weight:600" id="uploadStatus">Memproses database...</div>
+            <small style="color:var(--text-muted)" id="uploadDetail">Mengurai tabel dan data</small>
+          </div>
+        </div>
+        <div style="height:6px;background:var(--bg-secondary);border-radius:3px;overflow:hidden">
+          <div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));width:0%;transition:width 0.3s"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp" class="app-wrapper" style="display:none">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-logo">
+      <div class="logo-icon"><i class="bi bi-database-fill-gear"></i></div>
+      <div class="brand-text">
+        <h5>Klerek Dashboard</h5>
+        <small id="storeLabel">T939 • POS Monitor</small>
+      </div>
+    </div>
+    <div class="nav-menu">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item active" data-page="dashboard"><i class="bi bi-grid-1x2-fill"></i> Dashboard</div>
+      <div class="nav-item" data-page="transactions"><i class="bi bi-receipt-cutoff"></i> Transaksi</div>
+      <div class="nav-item" data-page="products"><i class="bi bi-box-seam-fill"></i> Produk</div>
+      <div class="nav-item" data-page="cashiers"><i class="bi bi-people-fill"></i> Kasir</div>
+      <div class="nav-section-title">Finance</div>
+      <div class="nav-item" data-page="payments"><i class="bi bi-credit-card-2-front-fill"></i> Pembayaran</div>
+      <div class="nav-section-title">System</div>
+      <div class="nav-item" data-page="monitoring"><i class="bi bi-cloud-check-fill"></i> Monitoring Sync</div>
+      <div class="nav-item" data-page="apilog"><i class="bi bi-terminal-fill"></i> API Log</div>
+      <div class="nav-item" data-page="report"><i class="bi bi-file-earmark-bar-graph-fill"></i> Laporan</div>
+      <div class="nav-item" data-page="settings"><i class="bi bi-gear-fill"></i> Settings</div>
+      <div class="nav-item" data-page="upload"><i class="bi bi-arrow-repeat"></i> Ganti Database</div>
+      <div class="nav-item" onclick="doLogout()" style="color:var(--accent-red)"><i class="bi bi-box-arrow-right"></i> Logout</div>
+    </div>
+  </aside>
+
+  <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/50 z-30 d-lg-none" onclick="toggleSidebar()" style="display:none"></div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="btn-custom d-lg-none" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div>
+          <h5 style="margin:0;font-weight:700" id="pageTitle">Dashboard</h5>
+          <small style="color:var(--text-muted)" id="pageSubtitle">Monitoring real-time aktivitas toko</small>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge-soft badge-green"><span class="live-dot"></span> LIVE</span>
+        <span class="badge-soft badge-blue" id="dbInfo">-</span>
+        <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()"></div>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-hero mb-4">
+          <div style="position:relative;z-index:1">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+              <div>
+                <div class="kpi-label"><i class="bi bi-cash-stack"></i> Uang Fisik Transaksi</div>
+                <div class="kpi-value" id="heroUangFisik">Rp 0</div>
+                <div class="kpi-sub"><span id="heroCash">Cash: Rp 0</span> • <span id="heroChange">Kembalian: Rp 0</span></div>
+              </div>
+              <div style="text-align:right">
+                <div class="kpi-label">Periode Data</div>
+                <div style="font-size:18px;font-weight:700" id="heroPeriod">-</div>
+                <div class="kpi-sub" id="heroCashierInfo">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6 col-xl-3"><div class="stat-card green"><div class="stat-icon" style="background:rgba(16,185,129,0.15);color:var(--accent-green)"><i class="bi bi-graph-up-arrow"></i></div><div class="stat-label">Sales</div><div class="stat-value text-money" id="kpiSales">Rp 0</div><div class="stat-sub" id="kpiSalesSub">Total omzet</div></div></div>
+          <div class="col-md-6 col-xl-3"><div class="stat-card blue"><div class="stat-icon" style="background:rgba(59,130,246,0.15);color:var(--accent-blue)"><i class="bi bi-person-check-fill"></i></div><div class="stat-label">Qty Member</div><div class="stat-value" id="kpiQtyMember">0</div><div class="stat-sub" id="kpiQtyMemberSub">Transaksi member</div></div></div>
+          <div class="col-md-6 col-xl-3"><div class="stat-card purple"><div class="stat-icon" style="background:rgba(139,92,246,0.15);color:var(--accent-purple)"><i class="bi bi-person-hearts"></i></div><div class="stat-label">Sales Member</div><div class="stat-value text-money" id="kpiSalesMember">Rp 0</div><div class="stat-sub" id="kpiSalesMemberSub">Omzet member</div></div></div>
+          <div class="col-md-6 col-xl-3"><div class="stat-card orange"><div class="stat-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-orange)"><i class="bi bi-cash-coin"></i></div><div class="stat-label">Uang Fisik Transaksi</div><div class="stat-value text-money" id="kpiUangFisik">Rp 0</div><div class="stat-sub" id="kpiUangFisikSub">Cash - Kembalian</div></div></div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-lg-8"><div class="chart-box"><h6><i class="bi bi-graph-up"></i> Sales per Jam</h6><canvas id="chartSalesHourly" height="110"></canvas></div></div>
+          <div class="col-lg-4"><div class="chart-box"><h6><i class="bi bi-pie-chart-fill"></i> Pembayaran per Metode</h6><canvas id="chartPayment" height="180"></canvas></div></div>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-people-fill"></i> Member per Jam</h6><canvas id="chartMemberHourly" height="110"></canvas></div></div>
+          <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-trophy-fill"></i> Top 10 Produk</h6><canvas id="chartTopProducts" height="110"></canvas></div></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-lg-7">
+            <div class="data-table">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center">
+                <h6 style="margin:0;font-weight:700"><i class="bi bi-trophy-fill" style="color:var(--accent-orange)"></i> Top 10 Produk Terlaris</h6>
+                <button class="btn-custom btn-sm" onclick="showPage('products')">Lihat Semua</button>
+              </div>
+              <div style="overflow-x:auto"><table class="table"><thead><tr><th>#</th><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Omzet</th></tr></thead><tbody id="topProductsBody"></tbody></table></div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="data-table">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-clock-history" style="color:var(--accent-cyan)"></i> Transaksi Terbaru</h6></div>
+              <div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Waktu</th><th style="text-align:right">Total</th></tr></thead><tbody id="recentTxBody"></tbody></table></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="page-transactions">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div><input type="text" class="form-control" id="txSearch" placeholder="Cari faktur / kasir..." style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-primary);width:280px"></div>
+          <div class="d-flex gap-2"><button class="btn-custom" onclick="exportCSV('tx')"><i class="bi bi-download"></i> Export CSV</button></div>
+        </div>
+        <div class="data-table"><div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Waktu</th><th>Kasir</th><th>Item</th><th style="text-align:right">Total</th><th style="text-align:right">Cash</th><th style="text-align:right">Kembalian</th><th>Metode</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="txTableBody"></tbody></table></div></div>
+      </div>
+
+      <div class="page" id="page-products">
+        <div class="row g-3 mb-3">
+          <div class="col-md-3"><div class="stat-card"><div class="stat-label">Total Produk Unik</div><div class="stat-value" id="prodUnique">0</div></div></div>
+          <div class="col-md-3"><div class="stat-card"><div class="stat-label">Total Qty Terjual</div><div class="stat-value" id="prodQty">0</div></div></div>
+          <div class="col-md-3"><div class="stat-card"><div class="stat-label">Total Omzet Produk</div><div class="stat-value text-money" id="prodOmzet">Rp 0</div></div></div>
+          <div class="col-md-3"><div class="stat-card"><div class="stat-label">Rata-rata per Produk</div><div class="stat-value text-money" id="prodAvg">Rp 0</div></div></div>
+        </div>
+        <div class="data-table">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h6 style="margin:0;font-weight:700"><i class="bi bi-box-seam-fill"></i> Ranking Produk</h6>
+            <input type="text" class="form-control form-control-sm" id="prodSearch" placeholder="Cari produk..." style="background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-primary);width:240px">
+          </div>
+          <div style="overflow-x:auto"><table class="table"><thead><tr><th style="width:60px">Rank</th><th>PLU</th><th>Nama Produk</th><th style="text-align:right">Qty Terjual</th><th style="text-align:right">Omzet</th><th style="text-align:right">Avg Price</th></tr></thead><tbody id="prodTableBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-cashiers"><div class="row g-3" id="cashierGrid"></div></div>
+
+      <div class="page" id="page-payments">
+        <div class="row g-3 mb-4">
+          <div class="col-md-4"><div class="chart-box"><h6><i class="bi bi-pie-chart-fill"></i> Distribusi Pembayaran</h6><canvas id="chartPayDist" height="220"></canvas></div></div>
+          <div class="col-md-8"><div class="chart-box"><h6><i class="bi bi-bar-chart-fill"></i> Nominal per Metode</h6><canvas id="chartPayBar" height="140"></canvas></div></div>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-4"><div class="stat-card green"><div class="stat-label">Total Cash</div><div class="stat-value text-money" id="payCash">Rp 0</div></div></div>
+          <div class="col-md-4"><div class="stat-card cyan"><div class="stat-label">Total Wallet</div><div class="stat-value text-money" id="payWallet">Rp 0</div></div></div>
+          <div class="col-md-4"><div class="stat-card purple"><div class="stat-label">Total Kartu</div><div class="stat-value text-money" id="payCard">Rp 0</div></div></div>
+        </div>
+        <div class="data-table">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-wallet2"></i> Detail Transaksi Wallet</h6></div>
+          <div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Wallet ID</th><th>Customer</th><th style="text-align:right">Nominal</th><th>Status</th><th>Waktu</th></tr></thead><tbody id="walletTableBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-monitoring">
+        <div class="row g-3 mb-4">
+          <div class="col-md-4"><div class="stat-card green"><div class="stat-label"><i class="bi bi-check-circle-fill"></i> Sync Berhasil</div><div class="stat-value" id="monSynced">0</div></div></div>
+          <div class="col-md-4"><div class="stat-card orange"><div class="stat-label"><i class="bi bi-hourglass-split"></i> Pending</div><div class="stat-value" id="monPending">0</div></div></div>
+          <div class="col-md-4"><div class="stat-card red"><div class="stat-label"><i class="bi bi-x-circle-fill"></i> Gagal</div><div class="stat-value" id="monFailed">0</div></div></div>
+        </div>
+        <div class="data-table">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-cloud-check-fill"></i> Log Sinkronisasi Transaksi</h6></div>
+          <div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Status</th><th>Tanggal Sync</th><th>Waktu Sync</th><th>Response</th></tr></thead><tbody id="syncTableBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-apilog">
+        <div class="data-table">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h6 style="margin:0;font-weight:700"><i class="bi bi-terminal-fill"></i> API Connection Log</h6>
+            <select class="form-select form-select-sm" id="apiModuleFilter" style="background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-primary);width:200px"><option value="">Semua Module</option></select>
+          </div>
+          <div style="overflow-x:auto"><table class="table"><thead><tr><th>Timestamp</th><th>Module</th><th>Process</th><th>Faktur</th><th>Status</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="apiTableBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-report">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6"><div class="chart-box"><h6><i class="bi bi-bar-chart-fill"></i> Sales per Jam (Detail)</h6><canvas id="chartReportSales" height="200"></canvas></div></div>
+          <div class="col-md-6"><div class="chart-box"><h6><i class="bi bi-people-fill"></i> Member per Jam (Detail)</h6><canvas id="chartReportMember" height="200"></canvas></div></div>
+        </div>
+        <div class="data-table">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-file-earmark-bar-graph-fill"></i> Ringkasan Laporan</h6></div>
+          <div style="padding:20px"><div id="reportSummary"></div></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-settings">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="stat-card">
+              <h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-info-circle-fill"></i> Informasi Database</h6>
+              <div id="dbInfoContent"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="stat-card">
+              <h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-palette-fill"></i> Tampilan</h6>
+              <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-secondary);border-radius:8px;margin-bottom:12px">
+                <div><div style="font-weight:600">Dark Mode</div><small style="color:var(--text-muted)">Tampilan gelap</small></div>
+                <div class="theme-toggle" id="darkToggle" onclick="setTheme('dark')"></div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-secondary);border-radius:8px">
+                <div><div style="font-weight:600">Light Mode</div><small style="color:var(--text-muted)">Tampilan terang</small></div>
+                <div class="theme-toggle" id="lightToggle" onclick="setTheme('light')"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="page-upload">
+        <div class="upload-zone" id="uploadZone2">
+          <div class="upload-icon"><i class="bi bi-arrow-repeat"></i></div>
+          <h5 style="font-weight:700">Ganti Database</h5>
+          <p style="color:var(--text-muted);margin:8px 0 20px">Upload file database SQLite yang baru</p>
+          <input type="file" id="fileInput2" accept=".db,.sqlite" style="display:none">
+          <button class="btn btn-primary-custom" onclick="document.getElementById('fileInput2').click()"><i class="bi bi-folder2-open"></i> Pilih File Baru</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <div class="footer-content">
+        <div class="footer-brand">© 2026 BrandRetailCortex.io</div>
+        <div class="footer-tagline">Advanced Analytics • Data Intelligence • Performance Monitoring</div>
+        <div class="footer-version">Version 2.0 Enterprise Edition</div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Modal: Transaction Detail -->
+<div class="modal fade modal-custom" id="txModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-receipt-cutoff"></i> Detail Transaksi <span id="txModalFaktur" class="mono"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="txModalBody"></div>
+      <div class="modal-footer"><button class="btn-custom" onclick="showReceiptFromModal()"><i class="bi bi-receipt"></i> Lihat Struk</button><button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Receipt -->
+<div class="modal fade modal-custom" id="receiptModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-receipt"></i> Struk POS</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" style="background:#1f2937"><div class="receipt-container" id="receiptContent"></div><div style="text-align:center;margin-top:20px"><button class="btn btn-primary-custom" onclick="downloadReceiptAsImage()"><i class="bi bi-download"></i> Download sebagai Gambar</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: API Detail -->
+<div class="modal fade modal-custom" id="apiModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-terminal-fill"></i> API Request / Response</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="apiModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ============================================================
+   ️ PASTE URL APPS SCRIPT LO DI BAWAH INI ⚠️
+   ============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzH6HBs-WFHTjm7bpyJ7lI4TTB9hdS2yzSIMrfkn1r-NSOhINPWI6tn8TSg_95UWTtlRg/exec';
+
+/* ============================================================
+   GLOBAL STATE
+   ============================================================ */
+let DB = null;
+let SQLLib = null;
+let DATA = {
+  tsale: [], trans: [], wallet: [], card: [], receipt: [],
+  cashier: [], login: [], sync: [], connection: [], usi: [],
+  pluNames: {}, storeId: 'T939', storeName: 'Cirokek'
+};
+let currentFakturModal = null;
+let charts = {};
+
+/* ============================================================
+   LOGIN SYSTEM (Google Sheets API)
+   ============================================================ */
+async function handleLogin(e) {
+  e.preventDefault();
+  
+  const kodeToko = document.getElementById('kodeToko').value.trim();
+  const pin = document.getElementById('pin').value.trim();
+  const btnLogin = document.getElementById('btnLogin');
+  const errorBox = document.getElementById('loginError');
+  const errorText = document.getElementById('loginErrorText');
+  
+  // Reset error
+  errorBox.classList.remove('show');
+  
+  // Validasi URL
+  if (APPS_SCRIPT_URL === 'PASTE_URL_APPS_SCRIPT_LO_DI_SINI' || !APPS_SCRIPT_URL) {
+    errorText.textContent = '⚠️ Sistem belum dikonfigurasi. Hubungi admin.';
+    errorBox.classList.add('show');
+    return;
+  }
+  
+  // Loading state
+  btnLogin.classList.add('loading');
+  btnLogin.disabled = true;
+  
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Penting untuk Google Apps Script
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kode_toko: kodeToko, pin: pin })
+    });
+    
+    // Karena mode no-cors, kita gak bisa baca response langsung
+    // Kita pakai teknik redirect untuk dapet response
+    // Atau kita pakai JSONP-like approach
+    
+    // Alternatif: pakai fetch dengan redirect follow
+    const response2 = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ kode_toko: kodeToko, pin: pin })
+    });
+    
+    const result = await response2.json();
+    
+    if (result.status === 'success') {
+      // Login berhasil!
+      sessionStorage.setItem('loggedIn', 'true');
+      sessionStorage.setItem('kodeToko', result.kode_toko);
+      sessionStorage.setItem('masaBerlaku', result.masa_berlaku);
+      
+      // Tampilkan welcome info
+      document.getElementById('welcomeKode').textContent = result.kode_toko;
+      document.getElementById('welcomeExpiry').textContent = result.masa_berlaku;
+      
+      // Lanjut ke loading
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('loadingScreen').style.display = 'flex';
+      initApp();
+    } else {
+      // Login gagal - cek jenis error
+      throw new Error(result.message || 'Login gagal');
+    }
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    
+    const msg = error.message || 'Kode Toko atau PIN salah!';
+    
+    // Cek apakah error karena expired/suspended
+    if (msg.includes('HABIS') || msg.includes('dinonaktifkan') || msg.includes('Off')) {
+      // Tampilkan screen expired
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('expiredMessage').textContent = msg;
+      document.getElementById('expiredScreen').classList.add('show');
+    } else {
+      // Tampilkan error di form login
+      errorText.textContent = msg;
+      errorBox.classList.add('show');
+    }
+  } finally {
+    btnLogin.classList.remove('loading');
+    btnLogin.disabled = false;
+  }
+}
+
+function backToLogin() {
+  document.getElementById('expiredScreen').classList.remove('show');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('kodeToko').value = '';
+  document.getElementById('pin').value = '';
+}
+
+function doLogout() {
+  if (confirm('Yakin ingin logout?')) {
+    sessionStorage.clear();
+    location.reload();
+  }
+}
+
+function checkAuth() {
+  if (sessionStorage.getItem('loggedIn') !== 'true') {
+    document.getElementById('loginScreen').style.display = 'flex';
+    return false;
+  }
+  document.getElementById('loginScreen').style.display = 'none';
+  
+  // Tampilkan welcome info
+  const kode = sessionStorage.getItem('kodeToko') || '-';
+  const expiry = sessionStorage.getItem('masaBerlaku') || '-';
+  document.getElementById('welcomeKode').textContent = kode;
+  document.getElementById('welcomeExpiry').textContent = expiry;
+  
+  return true;
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+const fmtRp = n => 'Rp ' + Math.round(n||0).toLocaleString('id-ID');
+const fmtNum = n => (n||0).toLocaleString('id-ID');
+const escHtml = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function parseTime(t) {
+  if (!t) return null;
+  const s = String(t).trim();
+  const m = s.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+  if (!m) return null;
+  return { h: parseInt(m[1]), m: parseInt(m[2]), s: parseInt(m[3]||0) };
+}
+
+function parseDate(d) {
+  if (!d) return null;
+  const s = String(d).trim();
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+    const [dd,mm,yy] = s.split(/[\/\s]/);
+    return new Date(`${yy}-${mm}-${dd}`);
+  }
+  const dt = new Date(s);
+  return isNaN(dt) ? null : dt;
+}
+
+function fmtDateTime(date, time) {
+  const d = parseDate(date);
+  const t = parseTime(time);
+  if (!d) return date || '-';
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  if (t) return `${dd}/${mm}/${yy} ${String(t.h).padStart(2,'0')}:${String(t.m).padStart(2,'0')}`;
+  return `${dd}/${mm}/${yy}`;
+}
+
+/* ============================================================
+   SQL LOADER
+   ============================================================ */
+async function initSqlJsLib(cfg) { return await window.initSqlJs(cfg); }
+
+async function loadDatabase(file) {
+  const prog = document.getElementById('uploadProgress');
+  const bar = document.getElementById('progressBar');
+  const status = document.getElementById('uploadStatus');
+  const detail = document.getElementById('uploadDetail');
+  prog.style.display = 'block';
+
+  const setProgress = (p, s, d) => {
+    bar.style.width = p + '%';
+    if (s) status.textContent = s;
+    if (d) detail.textContent = d;
+  };
+
+  try {
+    setProgress(10, 'Membaca file...', file.name);
+    const buf = await file.arrayBuffer();
+    setProgress(30, 'Memuat SQLite engine...', 'Inisialisasi sql.js');
+    if (!SQLLib) SQLLib = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+    setProgress(50, 'Parsing database...', 'Membaca struktur tabel');
+    DB = new SQLLib.Database(new Uint8Array(buf));
+    setProgress(70, 'Mengekstrak data...', 'Membaca tabel transaksi');
+    await extractData();
+    setProgress(90, 'Merender dashboard...', 'Menyiapkan tampilan');
+    await new Promise(r => setTimeout(r, 300));
+    setProgress(100, 'Selesai!', `${DATA.tsale.length} transaksi dimuat`);
+    await new Promise(r => setTimeout(r, 500));
+    document.getElementById('uploadScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    document.getElementById('dbInfo').textContent = file.name;
+    renderAll();
+  } catch (e) {
+    console.error(e);
+    alert('Gagal memuat database: ' + e.message);
+    prog.style.display = 'none';
+  }
+}
+
+function queryAll(sql) {
+  try {
+    const res = DB.exec(sql);
+    if (!res.length) return [];
+    const cols = res[0].columns;
+    return res[0].values.map(row => { const obj = {}; cols.forEach((c,i) => obj[c] = row[i]); return obj; });
+  } catch (e) { console.warn('Query failed:', sql, e.message); return []; }
+}
+
+async function extractData() {
+  DATA.tsale = queryAll('SELECT * FROM tx_tsale');
+  DATA.trans = queryAll('SELECT * FROM tx_trans');
+  DATA.wallet = queryAll('SELECT * FROM tx_tsale_wallet');
+  DATA.card = queryAll('SELECT * FROM tx_tsale_card');
+  DATA.receipt = queryAll('SELECT * FROM log_receipt_prn');
+  DATA.cashier = queryAll('SELECT * FROM log_cashier');
+  DATA.login = queryAll('SELECT * FROM log_login_pos');
+  DATA.sync = queryAll('SELECT * FROM log_trans_sync');
+  DATA.connection = queryAll('SELECT * FROM log_connection');
+  DATA.usi = queryAll('SELECT * FROM tx_usi');
+  const appInfo = queryAll('SELECT * FROM log_app_info LIMIT 1');
+  if (appInfo.length) DATA.storeId = appInfo[0].store_id || 'T939';
+  if (DATA.usi.length && DATA.usi[0].store_name) DATA.storeName = DATA.usi[0].store_name.replace(/\[.*\]/, '').trim();
+  extractPluNames();
+}
+
+function extractPluNames() {
+  const receiptByFaktur = {};
+  DATA.receipt.forEach(r => {
+    const faktur = r.faktur || r.bill_no;
+    if (!faktur) return;
+    const body = (r.body1 || '') + (r.body2 || '');
+    const lines = body.split('|').filter(l => l.trim());
+    receiptByFaktur[faktur] = lines;
+  });
+  const transByBill = {};
+  DATA.trans.forEach(t => { const b = t.bill_no; if (!transByBill[b]) transByBill[b] = []; transByBill[b].push(t); });
+  Object.keys(transByBill).forEach(billNo => {
+    const lines = receiptByFaktur[billNo] || [];
+    const trans = transByBill[billNo].sort((a,b) => (a.sort_no||0) - (b.sort_no||0));
+    const prodLines = lines.filter(l => {
+      const m = l.match(/^(.+?)\s+(-?\d+(?:\.\d+)?)\s+([\d.,-]+)\s+([\d.,-]+)$/);
+      if (!m) return false;
+      const name = m[1].trim();
+      return !/^(KP BRANDING|Tunai|Kembalian|Total|Disc\.|PPN|DONASI|===|---)/.test(name);
+    });
+    trans.forEach((t, idx) => {
+      if (prodLines[idx]) {
+        const m = prodLines[idx].match(/^(.+?)\s+(-?\d+(?:\.\d+)?)\s+([\d.,-]+)\s+([\d.,-]+)$/);
+        if (m) { const plu = String(t.plu); if (!DATA.pluNames[plu]) DATA.pluNames[plu] = m[1].trim(); }
+      }
+    });
+  });
+}
+
+/* ============================================================
+   CALCULATIONS
+   ============================================================ */
+function computeStats() {
+  const todayTx = DATA.tsale;
+  const sales = todayTx.reduce((s,t) => s + (t.total_faktur||0), 0);
+  const memberTx = todayTx.filter(t => t.cust_id && t.cust_id !== '');
+  const qtyMember = memberTx.length;
+  const salesMember = memberTx.reduce((s,t) => s + (t.total_faktur||0), 0);
+  const totalCash = todayTx.reduce((s,t) => s + (t.cash||0), 0);
+  const totalChange = todayTx.reduce((s,t) => s + (t.change_pay||0), 0);
+  const uangFisik = totalCash - totalChange;
+  const totalWallet = DATA.wallet.reduce((s,w) => s + (w.amount||0), 0);
+  const totalCard = DATA.card.reduce((s,c) => s + (c.amount||0), 0);
+  const cashierIds = [...new Set(DATA.tsale.map(t => t.user_id).filter(Boolean))];
+  const dates = [...new Set(DATA.tsale.map(t => t.date_tx).filter(Boolean))];
+  const dataDate = dates.length ? dates[0] : '-';
+  return { sales, qtyMember, salesMember, uangFisik, totalCash, totalChange, totalWallet, totalCard, cashierIds, dataDate, totalTx: DATA.tsale.length, totalItem: DATA.tsale.reduce((s,t) => s + (t.qty_pcs||0), 0) };
+}
+
+function computeProducts() {
+  const map = {};
+  DATA.trans.forEach(t => {
+    const plu = String(t.plu);
+    if (!plu || plu === '0') return;
+    const qty = parseFloat(t.qty) || 0;
+    if (qty <= 0) return;
+    const price = parseFloat(t.price) || 0;
+    const subtotal = price * qty;
+    if (!map[plu]) map[plu] = { plu, name: DATA.pluNames[plu] || `PLU ${plu}`, qty: 0, omzet: 0 };
+    map[plu].qty += qty;
+    map[plu].omzet += subtotal;
+  });
+  return Object.values(map).sort((a,b) => b.qty - a.qty);
+}
+
+function computeCashiers() {
+  const map = {};
+  DATA.tsale.forEach(t => {
+    const uid = t.user_id;
+    if (!uid) return;
+    if (!map[uid]) map[uid] = { id: uid, tx: 0, omzet: 0, items: 0 };
+    map[uid].tx++;
+    map[uid].omzet += t.total_faktur || 0;
+    map[uid].items += t.qty_pcs || 0;
+  });
+  DATA.login.forEach(l => {
+    if (map[l.user_id]) {
+      const ts = `${l.date_login} ${l.time_login}`;
+      if (!map[l.user_id].lastLogin || ts > map[l.user_id].lastLogin) map[l.user_id].lastLogin = ts;
+    }
+  });
+  return Object.values(map).sort((a,b) => b.omzet - a.omzet);
+}
+
+function computeHourly() {
+  const hours = Array(24).fill(0);
+  const counts = Array(24).fill(0);
+  const memberHours = Array(24).fill(0);
+  DATA.tsale.forEach(t => {
+    const tm = parseTime(t.time_tx);
+    if (tm) {
+      hours[tm.h] += t.total_faktur || 0;
+      counts[tm.h]++;
+      if (t.cust_id && t.cust_id !== '') memberHours[tm.h]++;
+    }
+  });
+  return { hours, counts, memberHours };
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderAll() {
+  const stats = computeStats();
+  renderDashboard(stats);
+  renderTransactions();
+  renderProducts();
+  renderCashiers();
+  renderPayments(stats);
+  renderMonitoring();
+  renderApiLog();
+  renderReport(stats);
+  renderSettings();
+  document.getElementById('storeLabel').textContent = `${DATA.storeId} • ${DATA.storeName}`;
+}
+
+function renderDashboard(s) {
+  document.getElementById('heroUangFisik').textContent = fmtRp(s.uangFisik);
+  document.getElementById('heroCash').textContent = 'Cash: ' + fmtRp(s.totalCash);
+  document.getElementById('heroChange').textContent = 'Kembalian: ' + fmtRp(s.totalChange);
+  document.getElementById('heroPeriod').textContent = fmtDateTime(s.dataDate);
+  document.getElementById('heroCashierInfo').textContent = `${s.cashierIds.length} kasir aktif • ${s.totalTx} transaksi`;
+  document.getElementById('kpiSales').textContent = fmtRp(s.sales);
+  document.getElementById('kpiSalesSub').textContent = `${s.totalTx} transaksi • ${s.totalItem} item`;
+  document.getElementById('kpiQtyMember').textContent = fmtNum(s.qtyMember);
+  const memberPercent = s.totalTx > 0 ? Math.round((s.qtyMember/s.totalTx)*100) : 0;
+  document.getElementById('kpiQtyMemberSub').textContent = `${memberPercent}% dari total transaksi`;
+  document.getElementById('kpiSalesMember').textContent = fmtRp(s.salesMember);
+  const salesMemberPercent = s.sales > 0 ? Math.round((s.salesMember/s.sales)*100) : 0;
+  document.getElementById('kpiSalesMemberSub').textContent = `${salesMemberPercent}% dari total sales`;
+  document.getElementById('kpiUangFisik').textContent = fmtRp(s.uangFisik);
+  document.getElementById('kpiUangFisikSub').textContent = `Cash ${fmtRp(s.totalCash)} - Kembalian ${fmtRp(s.totalChange)}`;
+  const products = computeProducts().slice(0, 10);
+  document.getElementById('topProductsBody').innerHTML = products.map((p,i) => {
+    const rank = i + 1;
+    const rankBg = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+    const medal = rank === 1 ? '🥇' : rank === 2 ? '' : rank === 3 ? '' : '';
+    return `<tr><td><span class="rank-badge ${rankBg}">${medal || rank}</span></td><td><div style="font-weight:500">${escHtml(p.name)}</div><div class="text-xs" style="color:var(--text-muted)">PLU: ${p.plu}</div></td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td></tr>`;
+  }).join('');
+  const recent = [...DATA.tsale].sort((a,b) => { const ta = parseTime(a.time_tx), tb = parseTime(b.time_tx); if (!ta || !tb) return 0; return (tb.h*3600+tb.m*60+tb.s) - (ta.h*3600+ta.m*60+ta.s); }).slice(0, 8);
+  document.getElementById('recentTxBody').innerHTML = recent.map(t => `<tr onclick="showTxDetail('${escHtml(t.faktur)}')" class="clickable"><td class="mono" style="font-weight:600">${escHtml(t.faktur)}</td><td>${escHtml(t.time_tx||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(t.total_faktur)}</td></tr>`).join('');
+  renderCharts(s);
+}
+
+function renderCharts(s) {
+  const hourly = computeHourly();
+  const labels = Array.from({length:24}, (_,i) => String(i).padStart(2,'0')+':00');
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)';
+  const textColor = isDark ? '#9ca3af' : '#475569';
+  if (charts.salesHourly) charts.salesHourly.destroy();
+  charts.salesHourly = new Chart(document.getElementById('chartSalesHourly').getContext('2d'), { type: 'bar', data: { labels, datasets: [{ label: 'Sales', data: hourly.hours, backgroundColor: 'rgba(16,185,129,0.6)', borderColor: 'rgba(16,185,129,1)', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: gridColor } }, x: { ticks: { color: textColor, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } } } } });
+  if (charts.memberHourly) charts.memberHourly.destroy();
+  charts.memberHourly = new Chart(document.getElementById('chartMemberHourly').getContext('2d'), { type: 'line', data: { labels, datasets: [{ label: 'Member', data: hourly.memberHours, backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', borderWidth: 2, fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } } } } });
+  if (charts.payment) charts.payment.destroy();
+  charts.payment = new Chart(document.getElementById('chartPayment').getContext('2d'), { type: 'doughnut', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: isDark ? '#e5e7eb' : '#0f172a', padding: 12 } } } } });
+  const products = computeProducts().slice(0, 10);
+  if (charts.topProducts) charts.topProducts.destroy();
+  charts.topProducts = new Chart(document.getElementById('chartTopProducts').getContext('2d'), { type: 'bar', data: { labels: products.map(p => p.name.length > 20 ? p.name.substring(0,20)+'...' : p.name), datasets: [{ label: 'Qty', data: products.map(p => p.qty), backgroundColor: 'rgba(245,158,11,0.6)', borderColor: 'rgba(245,158,11,1)', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } } } } });
+}
+
+function renderTransactions() {
+  const tbody = document.getElementById('txTableBody');
+  const rows = [...DATA.tsale].sort((a,b) => { const ta = parseTime(a.time_tx), tb = parseTime(b.time_tx); if (!ta || !tb) return 0; return (tb.h*3600+tb.m*60+tb.s) - (ta.h*3600+ta.m*60+ta.s); });
+  tbody.innerHTML = rows.map(t => {
+    const cash = t.cash || 0; const change = t.change_pay || 0;
+    const wallet = DATA.wallet.find(w => w.faktur === t.faktur);
+    const card = DATA.card.find(c => c.faktur === t.faktur);
+    let method = '<span class="badge-soft badge-green">Cash</span>';
+    if (wallet) method = '<span class="badge-soft badge-cyan">Wallet</span>';
+    if (card) method = '<span class="badge-soft badge-purple">Kartu</span>';
+    return `<tr onclick="showTxDetail('${escHtml(t.faktur)}')" class="clickable"><td class="mono" style="font-weight:600">${escHtml(t.faktur)}</td><td>${escHtml(t.time_tx||'-')}</td><td><span class="badge-soft badge-gray"><i class="bi bi-person-fill"></i> ${escHtml(t.user_id)}</span></td><td>${fmtNum(t.qty_pcs||0)} item</td><td style="text-align:right" class="text-money">${fmtRp(t.total_faktur)}</td><td style="text-align:right" class="text-money">${fmtRp(cash)}</td><td style="text-align:right" class="text-money">${fmtRp(change)}</td><td>${method}</td><td style="text-align:center"><button class="btn-custom btn-sm" onclick="event.stopPropagation();showReceipt('${escHtml(t.faktur)}')"><i class="bi bi-receipt"></i></button></td></tr>`;
+  }).join('');
+  document.getElementById('txSearch').oninput = e => { const q = e.target.value.toLowerCase(); tbody.querySelectorAll('tr').forEach(tr => { tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'; }); };
+}
+
+function renderProducts() {
+  const products = computeProducts();
+  const unique = products.length;
+  const totalQty = products.reduce((s,p) => s + p.qty, 0);
+  const totalOmzet = products.reduce((s,p) => s + p.omzet, 0);
+  document.getElementById('prodUnique').textContent = fmtNum(unique);
+  document.getElementById('prodQty').textContent = fmtNum(totalQty);
+  document.getElementById('prodOmzet').textContent = fmtRp(totalOmzet);
+  document.getElementById('prodAvg').textContent = fmtRp(unique ? totalOmzet/unique : 0);
+  const render = (list) => { document.getElementById('prodTableBody').innerHTML = list.slice(0, 100).map((p,i) => { const rank = i + 1; const rankBg = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other'; return `<tr><td><span class="rank-badge ${rankBg}">${rank}</span></td><td class="mono" style="font-size:12px">${p.plu}</td><td style="font-weight:500">${escHtml(p.name)}</td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td><td style="text-align:right" class="text-money">${fmtRp(p.qty ? p.omzet/p.qty : 0)}</td></tr>`; }).join(''); };
+  render(products);
+  document.getElementById('prodSearch').oninput = e => { const q = e.target.value.toLowerCase(); render(products.filter(p => p.name.toLowerCase().includes(q) || p.plu.includes(q))); };
+}
+
+function renderCashiers() {
+  const cashiers = computeCashiers();
+  document.getElementById('cashierGrid').innerHTML = cashiers.map(c => {
+    const lastLogin = c.lastLogin || '-';
+    return `<div class="col-md-6 col-xl-4"><div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px"><div style="display:flex;gap:12px;align-items:center"><div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px">${String(c.id).slice(-2)}</div><div><div style="font-weight:700;font-size:15px">Kasir ${escHtml(c.id)}</div><small style="color:var(--text-muted)">Login: ${escHtml(lastLogin)}</small></div></div><span class="badge-soft badge-green"><span class="live-dot"></span> Aktif</span></div><div class="row g-2"><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Transaksi</div><div style="font-weight:700;font-size:16px">${fmtNum(c.tx)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Item</div><div style="font-weight:700;font-size:16px">${fmtNum(c.items)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Omzet</div><div style="font-weight:700;font-size:13px" class="text-money">${fmtRp(c.omzet)}</div></div></div></div></div></div>`;
+  }).join('');
+}
+
+function renderPayments(s) {
+  document.getElementById('payCash').textContent = fmtRp(s.totalCash);
+  document.getElementById('payWallet').textContent = fmtRp(s.totalWallet);
+  document.getElementById('payCard').textContent = fmtRp(s.totalCard);
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#e5e7eb' : '#0f172a';
+  if (charts.payDist) charts.payDist.destroy();
+  charts.payDist = new Chart(document.getElementById('chartPayDist').getContext('2d'), { type: 'pie', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'], borderWidth: 2, borderColor: isDark ? '#1a2234' : '#ffffff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } } });
+  if (charts.payBar) charts.payBar.destroy();
+  charts.payBar = new Chart(document.getElementById('chartPayBar').getContext('2d'), { type: 'bar', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ label: 'Nominal', data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'], borderRadius: 6 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)' } }, y: { ticks: { color: textColor }, grid: { display: false } } } } });
+  document.getElementById('walletTableBody').innerHTML = DATA.wallet.slice(0, 50).map(w => `<tr><td class="mono">${escHtml(w.faktur)}</td><td class="mono" style="font-size:12px">${escHtml(w.wallet_id||'-')}</td><td>${escHtml(w.customer_id||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(w.amount)}</td><td><span class="badge-soft ${w.status==='S'?'badge-green':'badge-red'}">${escHtml(w.status||'-')}</span></td><td>${escHtml(w.date_tx||'-')} ${escHtml(w.create_date||'')}</td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Tidak ada transaksi wallet</td></tr>';
+}
+
+function renderMonitoring() {
+  const synced = DATA.sync.filter(s => s.status === 'S').length;
+  const failed = DATA.sync.filter(s => s.status === 'F').length;
+  const pending = DATA.sync.length - synced - failed;
+  document.getElementById('monSynced').textContent = fmtNum(synced);
+  document.getElementById('monFailed').textContent = fmtNum(failed);
+  document.getElementById('monPending').textContent = fmtNum(pending);
+  document.getElementById('syncTableBody').innerHTML = DATA.sync.slice(0, 100).map(s => {
+    const status = s.status;
+    let badge = 'badge-gray';
+    if (status === 'S') badge = 'badge-green';
+    else if (status === 'F') badge = 'badge-red';
+    else if (status === 'P') badge = 'badge-orange';
+    return `<tr><td class="mono">${escHtml(s.faktur)}</td><td><span class="badge-soft ${badge}">${escHtml(status||'-')}</span></td><td>${escHtml(s.date_sync||'-')}</td><td>${escHtml(s.time_sync||'-')}</td><td style="font-size:11px;color:var(--text-muted);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.response||'-')}</td></tr>`;
+  }).join('');
+}
+
+function renderApiLog() {
+  const modules = [...new Set(DATA.connection.map(c => c.module).filter(Boolean))];
+  const sel = document.getElementById('apiModuleFilter');
+  sel.innerHTML = '<option value="">Semua Module ('+DATA.connection.length+')</option>' + modules.map(m => `<option value="${escHtml(m)}">${escHtml(m)}</option>`).join('');
+  const render = (filter) => {
+    const list = filter ? DATA.connection.filter(c => c.module === filter) : DATA.connection;
+    document.getElementById('apiTableBody').innerHTML = list.slice(0, 100).map((c,i) => {
+      const status = c.status;
+      const badge = status === 'TRUE' ? 'badge-green' : 'badge-red';
+      return `<tr><td style="font-size:12px">${escHtml(c.date_time||'-')}</td><td><span class="badge-soft badge-blue">${escHtml(c.module||'-')}</span></td><td>${escHtml(c.process||'-')}</td><td class="mono" style="font-size:12px">${escHtml(c.faktur_tx||'-')}</td><td><span class="badge-soft ${badge}">${escHtml(status||'-')}</span></td><td style="text-align:center"><button class="btn-custom btn-sm" onclick="showApiDetail(${i},'${escHtml(c.module)}')"><i class="bi bi-eye"></i></button></td></tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Tidak ada log</td></tr>';
+  };
+  render();
+  sel.onchange = e => render(e.target.value);
+}
+
+function renderReport(s) {
+  const hourly = computeHourly();
+  const labels = Array.from({length:24}, (_,i) => String(i).padStart(2,'0')+':00');
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)';
+  const textColor = isDark ? '#9ca3af' : '#475569';
+  if (charts.reportSales) charts.reportSales.destroy();
+  charts.reportSales = new Chart(document.getElementById('chartReportSales').getContext('2d'), { type: 'bar', data: { labels, datasets: [{ label: 'Sales', data: hourly.hours, backgroundColor: 'rgba(16,185,129,0.6)', borderColor: 'rgba(16,185,129,1)', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } } });
+  if (charts.reportMember) charts.reportMember.destroy();
+  charts.reportMember = new Chart(document.getElementById('chartReportMember').getContext('2d'), { type: 'line', data: { labels, datasets: [{ label: 'Member', data: hourly.memberHours, backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', borderWidth: 2, fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } } });
+  const products = computeProducts();
+  const cashiers = computeCashiers();
+  document.getElementById('reportSummary').innerHTML = `<div class="row g-3"><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Transaksi</h6><table class="table" style="color:var(--text-primary)"><tr><td>Total Transaksi</td><td style="text-align:right;font-weight:700">${fmtNum(s.totalTx)}</td></tr><tr><td>Total Item</td><td style="text-align:right;font-weight:700">${fmtNum(s.totalItem)}</td></tr><tr><td>Rata-rata per Transaksi</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalTx ? s.sales/s.totalTx : 0)}</td></tr><tr><td>Rata-rata per Item</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalItem ? s.sales/s.totalItem : 0)}</td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Member</h6><table class="table" style="color:var(--text-primary)"><tr><td>Transaksi Member</td><td style="text-align:right;font-weight:700">${fmtNum(s.qtyMember)}</td></tr><tr><td>Sales Member</td><td style="text-align:right;font-weight:700">${fmtRp(s.salesMember)}</td></tr><tr><td>Persentase Member</td><td style="text-align:right;font-weight:700">${s.totalTx > 0 ? Math.round((s.qtyMember/s.totalTx)*100) : 0}%</td></tr><tr><td>Rata-rata per Member</td><td style="text-align:right;font-weight:700">${fmtRp(s.qtyMember ? s.salesMember/s.qtyMember : 0)}</td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Pembayaran</h6><table class="table" style="color:var(--text-primary)"><tr><td>Cash</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalCash)}</td></tr><tr><td>Wallet</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalWallet)}</td></tr><tr><td>Kartu</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalCard)}</td></tr><tr><td>Kembalian</td><td style="text-align:right;font-weight:700;color:var(--accent-orange)">${fmtRp(s.totalChange)}</td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Produk & Kasir</h6><table class="table" style="color:var(--text-primary)"><tr><td>Produk Unik</td><td style="text-align:right;font-weight:700">${fmtNum(products.length)}</td></tr><tr><td>Total Qty Terjual</td><td style="text-align:right;font-weight:700">${fmtNum(products.reduce((s,p)=>s+p.qty,0))}</td></tr><tr><td>Kasir Aktif</td><td style="text-align:right;font-weight:700">${fmtNum(cashiers.length)}</td></tr><tr><td>Uang Fisik Transaksi</td><td style="text-align:right;font-weight:700;color:var(--accent-orange)">${fmtRp(s.uangFisik)}</td></tr></table></div></div>`;
+}
+
+function renderSettings() {
+  const stats = computeStats();
+  document.getElementById('dbInfoContent').innerHTML = `<table class="table" style="color:var(--text-primary)"><tr><td>Store ID</td><td style="text-align:right;font-weight:700">${DATA.storeId}</td></tr><tr><td>Nama Toko</td><td style="text-align:right;font-weight:700">${DATA.storeName}</td></tr><tr><td>Tanggal Data</td><td style="text-align:right;font-weight:700">${fmtDateTime(stats.dataDate)}</td></tr><tr><td>Total Transaksi</td><td style="text-align:right;font-weight:700">${fmtNum(stats.totalTx)}</td></tr><tr><td>Total Item</td><td style="text-align:right;font-weight:700">${fmtNum(stats.totalItem)}</td></tr><tr><td>Kasir Aktif</td><td style="text-align:right;font-weight:700">${fmtNum(stats.cashierIds.length)}</td></tr><tr><td>Member Unik</td><td style="text-align:right;font-weight:700">${fmtNum(stats.qtyMember)}</td></tr></table>`;
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  document.getElementById('darkToggle').classList.toggle('active', isDark);
+  document.getElementById('lightToggle').classList.toggle('active', !isDark);
+  document.getElementById('themeToggle').classList.toggle('active', isDark);
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function showTxDetail(faktur) {
+  currentFakturModal = faktur;
+  const tx = DATA.tsale.find(t => t.faktur === faktur);
+  if (!tx) return;
+  document.getElementById('txModalFaktur').textContent = faktur;
+  const items = DATA.trans.filter(t => t.faktur === faktur || t.bill_no === tx.faktur).sort((a,b) => (a.sort_no||0) - (b.sort_no||0));
+  const usi = DATA.usi.find(u => u.faktur === faktur);
+  let html = `<div class="row g-3 mb-3"><div class="col-md-6"><div class="stat-card"><div class="stat-label">Tanggal</div><div style="font-weight:600">${fmtDateTime(tx.date_tx, tx.time_tx)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Kasir</div><div style="font-weight:600">${escHtml(tx.user_id)}</div></div></div>${usi && usi.member_name ? `<div class="col-md-6"><div class="stat-card"><div class="stat-label">Member</div><div style="font-weight:600">${escHtml(usi.member_name)}</div></div></div>` : ''}<div class="col-md-6"><div class="stat-card"><div class="stat-label">Total</div><div style="font-weight:700;font-size:20px;color:var(--accent-green)" class="text-money">${fmtRp(tx.total_faktur)}</div></div></div></div><h6 style="font-weight:700;margin:20px 0 12px"><i class="bi bi-box-seam-fill"></i> Item (${items.length})</h6><div style="background:var(--bg-secondary);border-radius:10px;padding:16px">`;
+  let subtotal = 0;
+  items.forEach(it => {
+    const qty = parseFloat(it.qty) || 0; const price = parseFloat(it.price) || 0; const disc = parseFloat(it.disc) || 0;
+    const lineTotal = qty * price; subtotal += lineTotal;
+    const plu = String(it.plu); const name = DATA.pluNames[plu] || `PLU ${plu}`;
+    html += `<div class="detail-item-row"><div><div class="detail-item-name">${escHtml(name)}</div><small style="color:var(--text-muted)">PLU: ${plu} • @ ${fmtRp(price)}</small>${disc > 0 ? `<div><small class="badge-soft badge-orange">Diskon ${fmtRp(disc)}</small></div>` : ''}</div><div class="detail-item-qty">× ${fmtNum(qty)}</div><div class="detail-item-price">${fmtRp(lineTotal)}</div></div>`;
+  });
+  html += `</div><div style="margin-top:16px;padding:16px;background:var(--bg-secondary);border-radius:10px"><div style="display:flex;justify-content:space-between;padding:6px 0"><span>Subtotal</span><span class="text-money">${fmtRp(subtotal)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0"><span>Diskon</span><span class="text-money" style="color:var(--accent-orange)">-${fmtRp(tx.discount||0)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border-color);margin-top:8px;padding-top:12px;font-weight:700;font-size:16px"><span>TOTAL</span><span class="text-money" style="color:var(--accent-green)">${fmtRp(tx.total_faktur)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--text-muted)"><span>Tunai</span><span class="text-money">${fmtRp(tx.cash||0)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--text-muted)"><span>Kembalian</span><span class="text-money">${fmtRp(tx.change_pay||0)}</span></div></div>`;
+  document.getElementById('txModalBody').innerHTML = html;
+  new bootstrap.Modal(document.getElementById('txModal')).show();
+}
+
+function showReceiptFromModal() {
+  if (currentFakturModal) { bootstrap.Modal.getInstance(document.getElementById('txModal')).hide(); showReceipt(currentFakturModal); }
+}
+
+function showReceipt(faktur) {
+  currentFakturModal = faktur;
+  let r = DATA.receipt.find(x => x.faktur === faktur || x.bill_no === faktur);
+  if (r) {
+    const header = (r.header || '').replace(/\|/g, '\n');
+    const body1 = (r.body1 || '').replace(/\|/g, '\n');
+    const body2 = (r.body2 || '').replace(/\|/g, '\n');
+    const body3 = (r.body3 || '').replace(/\|/g, '\n');
+    const addtl1 = (r.addtl1 || '').replace(/\|/g, '\n');
+    const addtl2 = (r.addtl2 || '').replace(/\|/g, '\n');
+    const addtl3 = (r.addtl3 || '').replace(/\|/g, '\n');
+    const footer = (r.footer || '').replace(/\|/g, '\n');
+    const content = [header, body1, body2, body3, addtl1, addtl2, addtl3, footer].filter(x => x.trim()).join('\n');
+    document.getElementById('receiptContent').innerHTML = `<pre>${escHtml(content)}</pre>`;
+  } else { generateReceiptFromTransaction(faktur); }
+  new bootstrap.Modal(document.getElementById('receiptModal')).show();
+}
+
+function generateReceiptFromTransaction(faktur) {
+  const tx = DATA.tsale.find(t => t.faktur === faktur);
+  if (!tx) { alert('Transaksi tidak ditemukan!'); return; }
+  const items = DATA.trans.filter(t => t.faktur === faktur || t.bill_no === faktur).sort((a,b) => (a.sort_no||0) - (b.sort_no||0));
+  const usi = DATA.usi.find(u => u.faktur === faktur);
+  let receiptText = `${DATA.storeName}\n${DATA.storeId}\n${fmtDateTime(tx.date_tx, tx.time_tx)}\nKasir: ${tx.user_id}\nFaktur: ${faktur}\n\n--------------------------------\n`;
+  items.forEach(it => {
+    const qty = parseFloat(it.qty) || 0; const price = parseFloat(it.price) || 0;
+    const plu = String(it.plu); const name = DATA.pluNames[plu] || `PLU ${plu}`;
+    const lineTotal = qty * price;
+    receiptText += `${name.substring(0, 20).padEnd(20)}\n${qty} x ${fmtRp(price)} = ${fmtRp(lineTotal)}\n`;
+  });
+  receiptText += `\n--------------------------------\nTOTAL: ${fmtRp(tx.total_faktur)}\nTunai: ${fmtRp(tx.cash||0)}\nKembalian: ${fmtRp(tx.change_pay||0)}\n`;
+  if (usi && usi.member_name) receiptText += `\nMember: ${usi.member_name}\n`;
+  receiptText += `\n--------------------------------\nTerima kasih\nAtas kunjungannya\n`;
+  document.getElementById('receiptContent').innerHTML = `<pre>${escHtml(receiptText)}</pre>`;
+}
+
+function downloadReceiptAsImage() {
+  const receiptEl = document.getElementById('receiptContent');
+  html2canvas(receiptEl, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `struk_${currentFakturModal || 'receipt'}_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+function showApiDetail(idx, module) {
+  const filter = document.getElementById('apiModuleFilter').value;
+  const list = filter ? DATA.connection.filter(c => c.module === filter) : DATA.connection;
+  const c = list[idx]; if (!c) return;
+  let req = c.str_request || ''; let res = c.str_response || '';
+  try { req = JSON.stringify(JSON.parse(req), null, 2); } catch(e){}
+  try { res = JSON.stringify(JSON.parse(res), null, 2); } catch(e){}
+  document.getElementById('apiModalBody').innerHTML = `<div class="row g-3 mb-3"><div class="col-md-6"><div class="stat-card"><div class="stat-label">Module</div><div style="font-weight:600">${escHtml(c.module)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Process</div><div style="font-weight:600">${escHtml(c.process)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Faktur</div><div style="font-weight:600" class="mono">${escHtml(c.faktur_tx||'-')}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Status</div><div style="font-weight:600"><span class="badge-soft ${c.status==='TRUE'?'badge-green':'badge-red'}">${escHtml(c.status)}</span></div></div></div></div><h6 style="font-weight:700;margin:16px 0 8px"><i class="bi bi-box-arrow-up"></i> Request</h6><pre style="background:var(--bg-secondary);padding:14px;border-radius:8px;font-size:11px;max-height:300px;overflow:auto;color:var(--text-primary)">${escHtml(req)}</pre><h6 style="font-weight:700;margin:16px 0 8px"><i class="bi bi-box-arrow-down"></i> Response</h6><pre style="background:var(--bg-secondary);padding:14px;border-radius:8px;font-size:11px;max-height:300px;overflow:auto;color:var(--text-primary)">${escHtml(res)}</pre>`;
+  new bootstrap.Modal(document.getElementById('apiModal')).show();
+}
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+function exportCSV(type) {
+  let csv = '';
+  if (type === 'tx') {
+    csv = 'Faktur,Tanggal,Waktu,Kasir,Total,Cash,Kembalian,Qty Item\n';
+    DATA.tsale.forEach(t => { csv += `"${t.faktur}","${t.date_tx}","${t.time_tx}","${t.user_id}",${t.total_faktur||0},${t.cash||0},${t.change_pay||0},${t.qty_pcs||0}\n`; });
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `transactions_${Date.now()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+const pageTitles = {
+  dashboard: ['Dashboard', 'Monitoring real-time aktivitas toko'],
+  transactions: ['Transaksi', 'Daftar seluruh transaksi penjualan'],
+  products: ['Produk', 'Ranking dan analisis produk'],
+  cashiers: ['Kasir', 'Statistik dan aktivitas kasir'],
+  payments: ['Pembayaran', 'Analisis metode pembayaran'],
+  monitoring: ['Monitoring Sync', 'Status sinkronisasi transaksi'],
+  apilog: ['API Log', 'Log koneksi API POS'],
+  report: ['Laporan', 'Ringkasan dan analisis lengkap'],
+  settings: ['Settings', 'Konfigurasi dashboard'],
+  upload: ['Ganti Database', 'Upload database SQLite baru']
+};
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+  const [title, sub] = pageTitles[page] || ['',''];
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('pageSubtitle').textContent = sub;
+  if (window.innerWidth < 992) { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display = 'none'; }
+}
+
+document.querySelectorAll('.nav-item').forEach(n => { n.addEventListener('click', () => showPage(n.dataset.page)); });
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function toggleTheme() { const current = document.body.getAttribute('data-theme'); setTheme(current === 'dark' ? 'light' : 'dark'); }
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  renderSettings();
+  if (DATA.tsale.length > 0) { const stats = computeStats(); renderCharts(stats); renderReport(stats); }
+}
+
+/* ============================================================
+   FILE UPLOAD HANDLING
+   ============================================================ */
+function setupUpload(zoneId, inputId) {
+  const zone = document.getElementById(zoneId); const input = document.getElementById(inputId);
+  if (!zone || !input) return;
+  zone.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') input.click(); });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); if (e.dataTransfer.files.length) loadDatabase(e.dataTransfer.files[0]); });
+  input.addEventListener('change', e => { if (e.target.files.length) loadDatabase(e.target.files[0]); });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function initApp() {
+  try {
+    SQLLib = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('uploadScreen').style.display = 'flex';
+    setupUpload('uploadZone', 'fileInput');
+    setupUpload('uploadZone2', 'fileInput2');
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loadingScreen').innerHTML = `<div style="text-align:center;color:var(--accent-red)"><i class="bi bi-exclamation-triangle-fill" style="font-size:48px"></i><h5 style="margin-top:16px">Gagal memuat SQLite engine</h5><p style="color:var(--text-muted)">${e.message}</p><button class="btn btn-primary-custom" onclick="location.reload()">Reload</button></div>`;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.body.setAttribute('data-theme', savedTheme);
+  if (!checkAuth()) return;
+  document.getElementById('loadingScreen').style.display = 'flex';
+  await initApp();
+});
+</script>
+</body>
+</html>
