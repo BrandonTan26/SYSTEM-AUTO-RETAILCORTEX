@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Klerek Dashboard — T939 POS Monitor</title>
+<title>System Analysis Dashboard — POS Monitor</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -399,7 +399,7 @@ body {
   <div class="login-box">
     <div class="login-header">
       <div class="login-icon"><i class="bi bi-database-fill-gear"></i></div>
-      <h2>Klerek Dashboard</h2>
+      <h2>System Analysis Dashboard</h2>
       <p>Silakan login untuk melanjutkan</p>
     </div>
     <div id="loginError" class="error-message">
@@ -448,7 +448,7 @@ body {
 <div id="loadingScreen" class="loading-screen" style="display:none">
   <div class="spinner-custom"></div>
   <div style="text-align:center">
-    <h5 style="margin:0;font-weight:700">Klerek Dashboard</h5>
+    <h5 style="margin:0;font-weight:700">System Dashboard</h5>
     <small style="color:var(--text-muted)">Memuat engine SQLite...</small>
   </div>
 </div>
@@ -460,7 +460,7 @@ body {
       <div style="width:70px;height:70px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:32px;margin-bottom:16px">
         <i class="bi bi-database-fill-gear"></i>
       </div>
-      <h2 style="font-weight:800;margin:0">Klerek Dashboard</h2>
+      <h2 style="font-weight:800;margin:0">System Dashboard</h2>
       <p style="color:var(--text-muted);margin-top:8px">Upload database SQLite POS Alfamart Anda</p>
       <div id="welcomeInfo" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:16px;margin-top:20px;text-align:left">
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Login sebagai:</div>
@@ -504,8 +504,8 @@ body {
     <div class="brand-logo">
       <div class="logo-icon"><i class="bi bi-database-fill-gear"></i></div>
       <div class="brand-text">
-        <h5>Klerek Dashboard</h5>
-        <small id="storeLabel">T939 • POS Monitor</small>
+        <h5>System Dashboard</h5>
+        <small id="storeLabel">• POS Monitor</small>
       </div>
     </div>
     <div class="nav-menu">
@@ -763,7 +763,7 @@ let SQLLib = null;
 let DATA = {
   tsale: [], trans: [], wallet: [], card: [], receipt: [],
   cashier: [], login: [], sync: [], connection: [], usi: [],
-  pluNames: {}, storeId: 'T939', storeName: 'Cirokek'
+  pluNames: {}, storeId: '2L44', storeName: 'BUNDARAN HI'
 };
 let currentFakturModal = null;
 let charts = {};
@@ -1012,7 +1012,7 @@ async function extractData() {
   DATA.connection = queryAll('SELECT * FROM log_connection');
   DATA.usi = queryAll('SELECT * FROM tx_usi');
   const appInfo = queryAll('SELECT * FROM log_app_info LIMIT 1');
-  if (appInfo.length) DATA.storeId = appInfo[0].store_id || 'T939';
+  if (appInfo.length) DATA.storeId = appInfo[0].store_id || '2L44';
   if (DATA.usi.length && DATA.usi[0].store_name) DATA.storeName = DATA.usi[0].store_name.replace(/\[.*\]/, '').trim();
   extractPluNames();
 }
