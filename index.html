@@ -101,6 +101,12 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 .chart-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; height: 100%; }
 .chart-box h6 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 16px; }
 
+/* ✅ CONTAINER CHART COMPACT - GA GEDE LAGI */
+.chart-compact { position: relative; height: 220px; width: 100%; }
+.chart-compact canvas { max-height: 220px !important; }
+.chart-pwp-compact { position: relative; height: 180px; width: 100%; max-width: 300px; margin: 0 auto; }
+.chart-pwp-compact canvas { max-height: 180px !important; }
+
 .modal-custom .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); }
 .modal-custom .modal-header { border-bottom: 1px solid var(--border-color); }
 .modal-custom .modal-footer { border-top: 1px solid var(--border-color); }
@@ -285,7 +291,6 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
-        <!-- DATE FILTER -->
         <select id="dateFilter" class="form-select form-select-sm" style="width: 140px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 12px;">
           <option value="">Semua Tanggal</option>
         </select>
@@ -328,7 +333,15 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
         </div>
         <div class="row g-3 mb-4">
           <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-people-fill"></i> Member per Jam</h6><canvas id="chartMemberHourly" height="110"></canvas></div></div>
-          <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-trophy-fill"></i> Top 10 Produk</h6><canvas id="chartTopProducts" height="110"></canvas></div></div>
+          <div class="col-lg-6">
+            <div class="chart-box">
+              <h6><i class="bi bi-trophy-fill"></i> Top 10 Produk</h6>
+              <!-- ✅ CONTAINER COMPACT -->
+              <div class="chart-compact">
+                <canvas id="chartTopProducts"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="row g-3">
           <div class="col-lg-7">
@@ -415,8 +428,15 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
           </div>
         </div>
         <div class="row g-3 mb-4">
-          <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-pie-chart-fill"></i> Distribusi Tier Transaksi</h6><canvas id="chartPwpTier" height="200"></canvas></div></div>
-          <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-bar-chart-fill"></i> Perbandingan Nominal per Tier</h6><canvas id="chartPwpNominal" height="200"></canvas></div></div>
+          <div class="col-lg-12">
+            <div class="chart-box">
+              <h6><i class="bi bi-pie-chart-fill"></i> Distribusi PWP vs Non-PWP</h6>
+              <!-- ✅ PWP CHART COMPACT -->
+              <div class="chart-pwp-compact">
+                <canvas id="chartPwp"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="row g-3 mb-4">
           <div class="col-lg-6">
@@ -532,8 +552,7 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjMdpDjGG7OaNbUQdbyroKOx14Z6KxhSu9Z_cw6WsYG6PbFtvGI3fbad2-O6tT9P1Zng/exec';
 
 let DB = null, SQLLib = null;
-let DATA = { tsale: [], trans: [], wallet: [], card: [], receipt: [], cashier: [], login: [], sync: [], connection: [], usi: [], pluNames: {}, storeId: '2L44', storeName: 'STORE' };
-// FILTERED DATA
+let DATA = { tsale: [], trans: [], wallet: [], card: [], receipt: [], cashier: [], login: [], sync: [], connection: [], usi: [], pluNames: {}, storeId: '2L44', storeName: 'STORE', detailTableInfo: null, masterProductInfo: null };
 let FILTERED_TSALE = [], FILTERED_TRANS = [], FILTERED_WALLET = [], FILTERED_CARD = [];
 let currentFakturModal = null, charts = {};
 
@@ -613,11 +632,117 @@ async function loadDatabase(file) {
     renderAll();
   } catch (e) { console.error(e); alert('Gagal memuat database: ' + e.message); prog.style.display = 'none'; }
 }
-function queryAll(sql) { try { const res = DB.exec(sql); if (!res.length) return []; const cols = res[0].columns; return res[0].values.map(row => { const obj = {}; cols.forEach((c,i) => obj[c] = row[i]); return obj; }); } catch (e) { return []; } }
+function queryAll(sql) { try { const res = DB.exec(sql); if (!res.length) return []; const cols = res[0].columns; return res[0].values.map(row => { const obj = {}; cols.forEach((c,i) => obj[c] = row[i]); return obj; }); } catch (e) { console.error('Query error:', sql, e); return []; } }
+
+// ✅ AUTO-DETECT TABEL DETAIL
+function detectDetailTable() {
+  let tables;
+  try {
+    tables = queryAll("SELECT name FROM sqlite_master WHERE type='table'").map(t => t.name);
+    console.log('📊 Available tables:', tables);
+  } catch(e) {
+    return { table: 'tx_trans', pluCol: 'plu', qtyCol: 'qty', priceCol: 'price', fakturCol: 'faktur', subtotalCol: null };
+  }
+
+  const detailCandidates = ['tx_trans', 'tx_trans_detail', 't_sale_detail', 'sale_detail', 'tx_sale_item', 'trans_detail', 'detail_transaksi', 'tx_item', 'sale_items', 'tx_detail'];
+
+  for (const candidate of detailCandidates) {
+    if (tables.includes(candidate)) {
+      let cols;
+      try { cols = queryAll(`PRAGMA table_info(${candidate})`).map(c => c.name); } catch(e) { continue; }
+      const colsLower = cols.map(c => c.toLowerCase());
+
+      const pluIdx = colsLower.findIndex(c => c === 'plu' || c === 'plu_id' || c === 'product_id' || c === 'item_id' || c === 'kode' || c === 'kode_plu');
+      const qtyIdx = colsLower.findIndex(c => c === 'qty' || c === 'quantity' || c === 'jumlah' || c === 'jml');
+      const priceIdx = colsLower.findIndex(c => c === 'price' || c === 'harga' || c === 'price_after_disc' || c === 'harga_setelah_disc');
+      const subtotalIdx = colsLower.findIndex(c => c === 'subtotal' || c === 'total' || c === 'amount' || c === 'line_total' || c === 'total_line');
+      const fakturIdx = colsLower.findIndex(c => c === 'faktur' || c === 'bill_no' || c === 'invoice' || c === 'no_faktur' || c === 'trx_id' || c === 'no_transaksi');
+
+      if (pluIdx >= 0 && qtyIdx >= 0) {
+        console.log('✅ Detail table detected:', candidate, 'cols:', cols);
+        return {
+          table: candidate,
+          pluCol: cols[pluIdx],
+          qtyCol: cols[qtyIdx],
+          priceCol: priceIdx >= 0 ? cols[priceIdx] : null,
+          subtotalCol: subtotalIdx >= 0 ? cols[subtotalIdx] : null,
+          fakturCol: fakturIdx >= 0 ? cols[fakturIdx] : 'faktur'
+        };
+      }
+    }
+  }
+
+  // Fallback scan
+  for (const table of tables) {
+    if (table.startsWith('log_') || table.startsWith('m_') || table === 'tx_tsale' || table === 'tx_tsale_wallet' || table === 'tx_tsale_card' || table === 'tx_usi') continue;
+    let cols;
+    try { cols = queryAll(`PRAGMA table_info(${table})`).map(c => c.name); } catch(e) { continue; }
+    const colsLower = cols.map(c => c.toLowerCase());
+    const pluIdx = colsLower.findIndex(c => c.includes('plu') || c.includes('product'));
+    const qtyIdx = colsLower.findIndex(c => c.includes('qty') || c.includes('quantity'));
+
+    if (pluIdx >= 0 && qtyIdx >= 0) {
+      const priceIdx = colsLower.findIndex(c => c.includes('price') || c.includes('harga'));
+      const subtotalIdx = colsLower.findIndex(c => c.includes('subtotal') || c === 'total' || c.includes('line_total'));
+      const fakturIdx = colsLower.findIndex(c => c.includes('faktur') || c.includes('bill') || c.includes('invoice'));
+
+      console.log('✅ Detail table detected (fallback):', table, 'cols:', cols);
+      return {
+        table,
+        pluCol: cols[pluIdx],
+        qtyCol: cols[qtyIdx],
+        priceCol: priceIdx >= 0 ? cols[priceIdx] : null,
+        subtotalCol: subtotalIdx >= 0 ? cols[subtotalIdx] : null,
+        fakturCol: fakturIdx >= 0 ? cols[fakturIdx] : null
+      };
+    }
+  }
+
+  console.warn('⚠️ Detail table not found, using default tx_trans');
+  return { table: 'tx_trans', pluCol: 'plu', qtyCol: 'qty', priceCol: 'price', fakturCol: 'faktur', subtotalCol: null };
+}
+
+function detectMasterProduct() {
+  let tables;
+  try { tables = queryAll("SELECT name FROM sqlite_master WHERE type='table'").map(t => t.name); } catch(e) { return null; }
+
+  const masterCandidates = ['m_product', 'm_products', 'products', 'product', 'm_item', 'item', 'master_product', 'master_produk', 'm_plu', 'm_plu_name', 'm_barang'];
+
+  for (const candidate of masterCandidates) {
+    if (tables.includes(candidate)) {
+      let cols;
+      try { cols = queryAll(`PRAGMA table_info(${candidate})`).map(c => c.name); } catch(e) { continue; }
+      const colsLower = cols.map(c => c.toLowerCase());
+      const pluIdx = colsLower.findIndex(c => c === 'plu' || c === 'plu_id' || c === 'product_id' || c === 'item_id' || c === 'kode');
+      const nameIdx = colsLower.findIndex(c => c === 'name' || c === 'nama' || c === 'product_name' || c === 'nama_produk' || c === 'description' || c === 'nama_barang');
+
+      if (pluIdx >= 0 && nameIdx >= 0) {
+        console.log('✅ Master product table detected:', candidate);
+        return { table: candidate, pluCol: cols[pluIdx], nameCol: cols[nameIdx] };
+      }
+    }
+  }
+  return null;
+}
 
 async function extractData() {
   DATA.tsale = queryAll('SELECT * FROM tx_tsale');
-  DATA.trans = queryAll('SELECT * FROM tx_trans');
+  console.log('✅ Loaded tsale:', DATA.tsale.length, 'rows');
+
+  DATA.detailTableInfo = detectDetailTable();
+  DATA.masterProductInfo = detectMasterProduct();
+
+  try {
+    DATA.trans = queryAll(`SELECT * FROM ${DATA.detailTableInfo.table}`);
+    console.log(`✅ Loaded ${DATA.trans.length} items from ${DATA.detailTableInfo.table}`);
+    if (DATA.trans.length > 0) {
+      console.log('📋 Sample transaction:', DATA.trans[0]);
+    }
+  } catch(e) {
+    console.error('Error loading detail table:', e);
+    DATA.trans = [];
+  }
+
   DATA.wallet = queryAll('SELECT * FROM tx_tsale_wallet');
   DATA.card = queryAll('SELECT * FROM tx_tsale_card');
   DATA.receipt = queryAll('SELECT * FROM log_receipt_prn');
@@ -626,17 +751,39 @@ async function extractData() {
   DATA.sync = queryAll('SELECT * FROM log_trans_sync');
   DATA.connection = queryAll('SELECT * FROM log_connection');
   DATA.usi = queryAll('SELECT * FROM tx_usi');
+
   const appInfo = queryAll('SELECT * FROM log_app_info LIMIT 1');
   if (appInfo.length) DATA.storeId = appInfo[0].store_id || '2L44';
   if (DATA.usi.length && DATA.usi[0].store_name) DATA.storeName = DATA.usi[0].store_name.replace(/\[.*\]/, '').trim();
+
+  // Normalisasi kolom
+  const dti = DATA.detailTableInfo;
+  DATA.trans.forEach(t => {
+    if (dti.fakturCol && dti.fakturCol !== 'faktur' && dti.fakturCol !== 'bill_no') {
+      if (!t.faktur && t[dti.fakturCol]) t.faktur = t[dti.fakturCol];
+      if (!t.bill_no && t[dti.fakturCol]) t.bill_no = t[dti.fakturCol];
+    }
+    if (dti.pluCol && dti.pluCol !== 'plu') {
+      if (t.plu === undefined && t[dti.pluCol] !== undefined) t.plu = t[dti.pluCol];
+    }
+    if (dti.qtyCol && dti.qtyCol !== 'qty') {
+      if (t.qty === undefined && t[dti.qtyCol] !== undefined) t.qty = t[dti.qtyCol];
+    }
+    if (dti.priceCol && dti.priceCol !== 'price') {
+      if (t.price === undefined && t[dti.priceCol] !== undefined) t.price = t[dti.priceCol];
+    }
+    if (dti.subtotalCol && dti.subtotalCol !== 'subtotal') {
+      if (t.subtotal === undefined && t[dti.subtotalCol] !== undefined) t.subtotal = t[dti.subtotalCol];
+    }
+  });
+
   extractPluNames();
-  
-  // Populate Date Filter
+
   const dates = [...new Set(DATA.tsale.map(t => t.date_tx).filter(Boolean))].sort().reverse();
   const dateSelect = document.getElementById('dateFilter');
   dateSelect.innerHTML = '<option value="">Semua Tanggal</option>' + dates.map(d => `<option value="${d}">${d}</option>`).join('');
-  if (dates.length > 0) dateSelect.value = dates[0]; // Default to latest date
-  
+  if (dates.length > 0) dateSelect.value = dates[0];
+
   updateFilteredData();
 }
 
@@ -651,15 +798,30 @@ function updateFilteredData() {
     FILTERED_WALLET = DATA.wallet.filter(w => fakturs.has(w.faktur));
     FILTERED_CARD = DATA.card.filter(c => fakturs.has(c.faktur));
   }
+  console.log('🔍 Filtered:', FILTERED_TSALE.length, 'tsale,', FILTERED_TRANS.length, 'trans items');
 }
 
 document.getElementById('dateFilter').addEventListener('change', () => { updateFilteredData(); renderAll(); });
 
 function extractPluNames() {
+  DATA.pluNames = {};
+
+  if (DATA.masterProductInfo) {
+    try {
+      const masterData = queryAll(`SELECT ${DATA.masterProductInfo.pluCol} as plu, ${DATA.masterProductInfo.nameCol} as name FROM ${DATA.masterProductInfo.table}`);
+      masterData.forEach(m => {
+        const plu = String(m.plu);
+        if (plu && m.name && String(m.name).trim()) DATA.pluNames[plu] = String(m.name).trim();
+      });
+      console.log(`✅ Loaded ${Object.keys(DATA.pluNames).length} product names from master table`);
+    } catch(e) { console.error('Error loading master product:', e); }
+  }
+
   const receiptByFaktur = {};
   DATA.receipt.forEach(r => { const faktur = r.faktur || r.bill_no; if (!faktur) return; receiptByFaktur[faktur] = ((r.body1||'') + (r.body2||'')).split('|').filter(l => l.trim()); });
   const transByBill = {};
-  DATA.trans.forEach(t => { const b = t.bill_no; if (!transByBill[b]) transByBill[b] = []; transByBill[b].push(t); });
+  DATA.trans.forEach(t => { const b = t.bill_no || t.faktur; if (!b) return; if (!transByBill[b]) transByBill[b] = []; transByBill[b].push(t); });
+
   Object.keys(transByBill).forEach(billNo => {
     const lines = receiptByFaktur[billNo] || [];
     const trans = transByBill[billNo].sort((a,b) => (a.sort_no||0) - (b.sort_no||0));
@@ -670,7 +832,6 @@ function extractPluNames() {
   });
 }
 
-// ✅ FIXED STATS WITH TOPOUP & FILTER
 function computeStats() {
   const tx = FILTERED_TSALE;
   const sales = tx.reduce((s,t) => s + (t.total_faktur||0), 0);
@@ -680,7 +841,7 @@ function computeStats() {
   const totalCash = tx.reduce((s,t) => s + (t.cash||0), 0);
   const totalChange = tx.reduce((s,t) => s + (t.change_pay||0), 0);
   const totalTopup = tx.reduce((s,t) => s + (parseFloat(t.nom_topup)||0), 0);
-  const uangFisik = totalCash - totalChange + totalTopup; // ✅ RUMUS BENAR
+  const uangFisik = totalCash - totalChange + totalTopup;
   const totalWallet = FILTERED_WALLET.reduce((s,w) => s + (w.amount||0), 0);
   const totalCard = FILTERED_CARD.reduce((s,c) => s + (c.amount||0), 0);
   const cashierIds = [...new Set(tx.map(t => t.user_id).filter(Boolean))];
@@ -689,16 +850,36 @@ function computeStats() {
   return { sales, qtyMember, salesMember, uangFisik, totalCash, totalChange, totalTopup, totalWallet, totalCard, cashierIds, dataDate, totalTx: tx.length, totalItem: tx.reduce((s,t) => s + (t.qty_pcs||0), 0) };
 }
 
+// ✅ COMPUTE PRODUCTS - DIPERBAIKI
 function computeProducts() {
   const map = {};
+
   FILTERED_TRANS.forEach(t => {
-    const plu = String(t.plu); if (!plu || plu === '0') return;
-    const qty = parseFloat(t.qty) || 0; if (qty <= 0) return;
-    const price = parseFloat(t.price) || 0;
-    if (!map[plu]) map[plu] = { plu, name: DATA.pluNames[plu] || `PLU ${plu}`, qty: 0, omzet: 0 };
-    map[plu].qty += qty; map[plu].omzet += price * qty;
+    const plu = String(t.plu);
+    if (!plu || plu === '0' || plu === '' || plu === 'null' || plu === 'undefined') return;
+
+    const qty = parseFloat(t.qty) || 0;
+    if (qty <= 0) return;
+
+    let lineTotal;
+    if (t.subtotal !== undefined && t.subtotal !== null && parseFloat(t.subtotal) > 0) {
+      lineTotal = parseFloat(t.subtotal) || 0;
+    } else {
+      const price = parseFloat(t.price) || 0;
+      lineTotal = price * qty;
+    }
+
+    if (!map[plu]) {
+      map[plu] = { plu, name: DATA.pluNames[plu] || `PLU ${plu}`, qty: 0, omzet: 0 };
+    }
+    map[plu].qty += qty;
+    map[plu].omzet += lineTotal;
   });
-  return Object.values(map).sort((a,b) => b.qty - a.qty);
+
+  const result = Object.values(map).sort((a,b) => b.qty - a.qty);
+  console.log('✅ computeProducts result:', result.length, 'products');
+  if (result.length > 0) console.log('🏆 Top 3:', result.slice(0, 3));
+  return result;
 }
 
 function computeCashiers() {
@@ -756,10 +937,10 @@ function renderDashboard(s) {
   document.getElementById('kpiSalesMemberSub').textContent = `${s.sales > 0 ? Math.round((s.salesMember/s.sales)*100) : 0}% dari sales`;
   document.getElementById('kpiUangFisik').textContent = fmtRp(s.uangFisik);
   document.getElementById('kpiUangFisikSub').textContent = `Cash ${fmtRp(s.totalCash)} - Kembalian ${fmtRp(s.totalChange)} + Topup ${fmtRp(s.totalTopup)}`;
-  
+
   const products = computeProducts().slice(0, 10);
   document.getElementById('topProductsBody').innerHTML = products.map((p,i) => `<tr><td><span class="rank-badge ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other'}">${i+1}</span></td><td><div style="font-weight:500">${escHtml(p.name)}</div><div class="text-xs" style="color:var(--text-muted)">PLU: ${p.plu}</div></td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td></tr>`).join('');
-  
+
   const recent = [...FILTERED_TSALE].sort((a,b) => { const ta = parseTime(a.time_tx), tb = parseTime(b.time_tx); if (!ta || !tb) return 0; return (tb.h*3600+tb.m*60+tb.s) - (ta.h*3600+ta.m*60+ta.s); }).slice(0, 8);
   document.getElementById('recentTxBody').innerHTML = recent.map(t => `<tr onclick="showTxDetail('${escHtml(t.faktur)}')" class="clickable"><td class="mono" style="font-weight:600">${escHtml(t.faktur)}</td><td>${escHtml(t.time_tx||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(t.total_faktur)}</td></tr>`).join('');
   renderCharts(s);
@@ -775,9 +956,45 @@ function renderCharts(s) {
   charts.memberHourly = new Chart(document.getElementById('chartMemberHourly').getContext('2d'), { type: 'line', data: { labels, datasets: [{ data: hourly.memberHours, backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor, maxRotation: 0, autoSkip: true }, grid: { display: false } } } } });
   if (charts.payment) charts.payment.destroy();
   charts.payment = new Chart(document.getElementById('chartPayment').getContext('2d'), { type: 'doughnut', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: isDark ? '#e5e7eb' : '#0f172a' } } } } });
-  const products = computeProducts().slice(0, 10);
+
+  // ✅ TOP 10 PRODUK - COMPACT, NO ANIMATION
+  const top10 = computeProducts().slice(0, 10);
   if (charts.topProducts) charts.topProducts.destroy();
-  charts.topProducts = new Chart(document.getElementById('chartTopProducts').getContext('2d'), { type: 'bar', data: { labels: products.map(p => p.name.length > 20 ? p.name.substring(0,20)+'...' : p.name), datasets: [{ data: products.map(p => p.qty), backgroundColor: 'rgba(245,158,11,0.6)', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } } } } });
+  charts.topProducts = new Chart(document.getElementById('chartTopProducts').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: top10.map(x => x.name.length > 22 ? x.name.substring(0,22)+'...' : x.name),
+      datasets: [{
+        label: 'Qty',
+        data: top10.map(x => x.qty),
+        backgroundColor: 'rgba(245,158,11,0.6)',
+        borderColor: 'rgba(245,158,11,1)',
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmtNum(ctx.parsed.x) + ' pcs' } }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: { color: textColor },
+          grid: { color: gridColor }
+        },
+        y: {
+          ticks: { color: textColor, font: { size: 10 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
 }
 
 function renderTransactions() {
@@ -791,11 +1008,37 @@ function renderTransactions() {
   document.getElementById('txSearch').oninput = e => { const q = e.target.value.toLowerCase(); tbody.querySelectorAll('tr').forEach(tr => { tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'; }); };
 }
 
+// ✅ RENDER PRODUCTS - RANK BADGE FIX
 function renderProducts() {
   const products = computeProducts();
-  document.getElementById('prodUnique').textContent = fmtNum(products.length); document.getElementById('prodQty').textContent = fmtNum(products.reduce((s,p) => s + p.qty, 0)); document.getElementById('prodOmzet').textContent = fmtRp(products.reduce((s,p) => s + p.omzet, 0)); document.getElementById('prodAvg').textContent = fmtRp(products.length ? products.reduce((s,p) => s + p.omzet, 0)/products.length : 0);
-  const render = (list) => { document.getElementById('prodTableBody').innerHTML = list.slice(0, 100).map((p,i) => `<tr><td><span class="rank-badge ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other'}">${i+1}</span></td><td class="mono" style="font-size:12px">${p.plu}</td><td style="font-weight:500">${escHtml(p.name)}</td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td><td style="text-align:right" class="text-money">${fmtRp(p.qty ? p.omzet/p.qty : 0)}</td></tr>`).join(''); };
-  render(products); document.getElementById('prodSearch').oninput = e => { const q = e.target.value.toLowerCase(); render(products.filter(p => p.name.toLowerCase().includes(q) || p.plu.includes(q))); };
+  document.getElementById('prodUnique').textContent = fmtNum(products.length);
+  document.getElementById('prodQty').textContent = fmtNum(products.reduce((s,p) => s + p.qty, 0));
+  document.getElementById('prodOmzet').textContent = fmtRp(products.reduce((s,p) => s + p.omzet, 0));
+  document.getElementById('prodAvg').textContent = fmtRp(products.length ? products.reduce((s,p) => s + p.omzet, 0)/products.length : 0);
+
+  const render = (list) => {
+    let html = '';
+    list.slice(0, 200).forEach((p, index) => {
+      const rank = index + 1;
+      let cls = 'rank-other';
+      if (rank === 1) cls = 'rank-1';
+      else if (rank === 2) cls = 'rank-2';
+      else if (rank === 3) cls = 'rank-3';
+      
+      html += `<tr>
+        <td><div class="rank-badge ${cls}">${rank}</div></td>
+        <td class="mono" style="font-size:12px">${p.plu}</td>
+        <td style="font-weight:500">${escHtml(p.name)}</td>
+        <td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td>
+        <td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td>
+        <td style="text-align:right" class="text-money">${fmtRp(p.qty ? p.omzet/p.qty : 0)}</td>
+      </tr>`;
+    });
+    document.getElementById('prodTableBody').innerHTML = html;
+  };
+  
+  render(products);
+  document.getElementById('prodSearch').oninput = e => { const q = e.target.value.toLowerCase(); render(products.filter(p => p.name.toLowerCase().includes(q) || p.plu.includes(q))); };
 }
 
 function renderCashiers() { document.getElementById('cashierGrid').innerHTML = computeCashiers().map(c => `<div class="col-md-6 col-xl-4"><div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px"><div style="display:flex;gap:12px;align-items:center"><div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px">${String(c.id).slice(-2)}</div><div><div style="font-weight:700;font-size:15px">Kasir ${escHtml(c.id)}</div></div></div></div><div class="row g-2"><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Transaksi</div><div style="font-weight:700;font-size:16px">${fmtNum(c.tx)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Item</div><div style="font-weight:700;font-size:16px">${fmtNum(c.items)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Omzet</div><div style="font-weight:700;font-size:13px" class="text-money">${fmtRp(c.omzet)}</div></div></div></div></div></div>`).join(''); }
@@ -832,34 +1075,60 @@ function renderReport(s) {
 
 function renderSettings() {
   const stats = computeStats();
-  document.getElementById('dbInfoContent').innerHTML = `<table class="table" style="color:var(--text-primary)"><tr><td>Store ID</td><td style="text-align:right;font-weight:700">${DATA.storeId}</td></tr><tr><td>Nama Toko</td><td style="text-align:right;font-weight:700">${DATA.storeName}</td></tr><tr><td>Total Transaksi (Filtered)</td><td style="text-align:right;font-weight:700">${fmtNum(stats.totalTx)}</td></tr></table>`;
+  const dtInfo = DATA.detailTableInfo;
+  const mpInfo = DATA.masterProductInfo;
+  document.getElementById('dbInfoContent').innerHTML = `<table class="table" style="color:var(--text-primary)"><tr><td>Store ID</td><td style="text-align:right;font-weight:700">${DATA.storeId}</td></tr><tr><td>Nama Toko</td><td style="text-align:right;font-weight:700">${DATA.storeName}</td></tr><tr><td>Total Transaksi (Filtered)</td><td style="text-align:right;font-weight:700">${fmtNum(stats.totalTx)}</td></tr><tr><td>Tabel Detail Produk</td><td style="text-align:right;font-weight:700"><span class="badge-soft badge-green">${dtInfo?.table || '-'}</span></td></tr><tr><td>Tabel Master Produk</td><td style="text-align:right;font-weight:700"><span class="badge-soft ${mpInfo?'badge-blue':'badge-gray'}">${mpInfo?.table || 'Tidak ada'}</span></td></tr><tr><td>Nama Produk Terdeteksi</td><td style="text-align:right;font-weight:700">${fmtNum(Object.keys(DATA.pluNames).length)}</td></tr></table>`;
   const isDark = document.body.getAttribute('data-theme') === 'dark';
   document.getElementById('darkToggle').classList.toggle('active', isDark); document.getElementById('lightToggle').classList.toggle('active', !isDark); document.getElementById('themeToggle').classList.toggle('active', isDark);
 }
 
+// ✅ RENDER PWP - DOUGHNUT COMPACT
 function renderPWPAnalysis() {
   const { tier1, tier2, excludedTx } = analyzePWP();
   const totalTx = FILTERED_TSALE.length;
   const totalSales = FILTERED_TSALE.reduce((s,t) => s + (t.total_faktur||0), 0);
   const avgPurchase = totalTx > 0 ? totalSales / totalTx : 0;
-  const tier1Total = tier1.reduce((s,t) => s + (t.total_faktur||0), 0);
-  const tier2Total = tier2.reduce((s,t) => s + (t.total_faktur||0), 0);
-  
+
   document.getElementById('pwpTier1Count').textContent = tier1.length.toLocaleString('id-ID');
   document.getElementById('pwpTier1Percent').textContent = totalTx > 0 ? ((tier1.length / totalTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
   document.getElementById('pwpTier2Count').textContent = tier2.length.toLocaleString('id-ID');
   document.getElementById('pwpTier2Percent').textContent = totalTx > 0 ? ((tier2.length / totalTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
   document.getElementById('pwpAvgPurchase').textContent = fmtRp(avgPurchase);
   document.getElementById('pwpTotalTx').textContent = totalTx.toLocaleString('id-ID');
-  
+
   document.getElementById('pwpTier1Body').innerHTML = tier1.slice(0, 50).map(tx => { const items = FILTERED_TRANS.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur); return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')"><td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td><td>${escHtml(tx.time_tx||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td><td><span class="badge-soft badge-blue">${items.length} items</span></td></tr>`; }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
   document.getElementById('pwpTier2Body').innerHTML = tier2.slice(0, 50).map(tx => { const items = FILTERED_TRANS.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur); return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')"><td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td><td>${escHtml(tx.time_tx||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td><td><span class="badge-soft badge-purple">${items.length} items</span></td></tr>`; }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
+
+  const pwpQty = tier2.length;
+  const nonPwpQty = totalTx - tier2.length;
   
-  const isDark = document.body.getAttribute('data-theme') === 'dark'; const textColor = isDark ? '#9ca3af' : '#475569';
-  if (charts.pwpTier) charts.pwpTier.destroy();
-  charts.pwpTier = new Chart(document.getElementById('chartPwpTier').getContext('2d'), { type: 'doughnut', data: { labels: ['20K - <50K', '≥50K (Eligible)', '≥50K (Excluded)', '<20K'], datasets: [{ data: [tier1.length, tier2.length, excludedTx.length, totalTx - tier1.length - tier2.length - excludedTx.length], backgroundColor: ['#3b82f6', '#8b5cf6', '#ef4444', '#6b7280'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } } });
-  if (charts.pwpNominal) charts.pwpNominal.destroy();
-  charts.pwpNominal = new Chart(document.getElementById('chartPwpNominal').getContext('2d'), { type: 'bar', data: { labels: ['20K - <50K', '≥50K (Eligible)'], datasets: [{ data: [tier1Total, tier2Total], backgroundColor: ['rgba(59,130,246,0.6)', 'rgba(139,92,246,0.6)'], borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' } }, x: { ticks: { color: textColor } } } } });
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#e5e7eb' : '#0f172a';
+  
+  if (charts.pwp) charts.pwp.destroy();
+  charts.pwp = new Chart(document.getElementById('chartPwp').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['PWP (≥50K)', 'Non PWP'],
+      datasets: [{
+        data: [pwpQty, nonPwpQty],
+        backgroundColor: ['#8b5cf6', '#6b7280'],
+        borderColor: isDark ? '#1a2234' : '#ffffff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: textColor, font: { size: 11 } }
+        }
+      }
+    }
+  });
 }
 
 function showTxDetail(faktur) {
