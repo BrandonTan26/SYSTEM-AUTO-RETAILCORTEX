@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root {
   --bg-primary: #0a0e1a;
@@ -155,6 +156,8 @@ body {
 .stat-card.blue::before { background: var(--accent-blue); }
 .stat-card.purple::before { background: var(--accent-purple); }
 .stat-card.orange::before { background: var(--accent-orange); }
+.stat-card.red::before { background: var(--accent-red); }
+.stat-card.cyan::before { background: var(--accent-cyan); }
 .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
 .stat-card .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 14px; }
 .stat-card .stat-label { color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
@@ -390,6 +393,8 @@ body {
 }
 .btn-login.loading .login-spinner { display: inline-block; }
 .btn-login.loading .btn-text { display: none; }
+
+.pwp-exclude-tag { display: inline-block; background: rgba(239,68,68,0.15); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 4px; }
 </style>
 </head>
 <body data-theme="dark">
@@ -471,14 +476,14 @@ body {
     </div>
     <div class="upload-zone" id="uploadZone">
       <div class="upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
-      <h5 style="font-weight:700">Drop file .db / .sqlite di sini</h5>
+      <h5 style="font-weight:700">Drop file .db / .sqlite / .zip di sini</h5>
       <p style="color:var(--text-muted);margin:8px 0 20px">atau klik untuk memilih file dari perangkat Anda</p>
-      <input type="file" id="fileInput" accept=".db,.sqlite" style="display:none">
+      <input type="file" id="fileInput" accept=".db,.sqlite,.zip" style="display:none">
       <button class="btn btn-primary-custom" onclick="document.getElementById('fileInput').click()">
         <i class="bi bi-folder2-open"></i> Pilih File Database
       </button>
       <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">
-        Support: .db, .sqlite (SQLite3)
+        Support: .db, .sqlite, .zip (Auto-extract)
       </div>
     </div>
     <div id="uploadProgress" style="display:none;margin-top:20px">
@@ -514,6 +519,7 @@ body {
       <div class="nav-item" data-page="transactions"><i class="bi bi-receipt-cutoff"></i> Transaksi</div>
       <div class="nav-item" data-page="products"><i class="bi bi-box-seam-fill"></i> Produk</div>
       <div class="nav-item" data-page="cashiers"><i class="bi bi-people-fill"></i> Kasir</div>
+      <div class="nav-item" data-page="pwp-analysis"><i class="bi bi-gift-fill"></i> Analisis PWP</div>
       <div class="nav-section-title">Finance</div>
       <div class="nav-item" data-page="payments"><i class="bi bi-credit-card-2-front-fill"></i> Pembayaran</div>
       <div class="nav-section-title">System</div>
@@ -623,6 +629,131 @@ body {
 
       <div class="page" id="page-cashiers"><div class="row g-3" id="cashierGrid"></div></div>
 
+      <!-- PWP Analysis Page -->
+      <div class="page" id="page-pwp-analysis">
+        <div class="kpi-hero mb-4">
+          <div style="position:relative;z-index:1">
+            <div class="kpi-label"><i class="bi bi-gift-fill"></i> Analisis PWP & Customer Value</div>
+            <div class="kpi-sub">Segmentasi transaksi untuk program Promo With Purchase</div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6 col-xl-4">
+            <div class="stat-card blue">
+              <div class="stat-icon" style="background:rgba(59,130,246,0.15);color:var(--accent-blue)"><i class="bi bi-cart-check-fill"></i></div>
+              <div class="stat-label">Transaksi 20K - &lt;50K</div>
+              <div class="stat-value" id="pwpTier1Count">0</div>
+              <div class="stat-sub" id="pwpTier1Percent">0% dari total</div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)">
+                <small style="color:var(--text-muted)">Semua kategori produk</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-xl-4">
+            <div class="stat-card purple">
+              <div class="stat-icon" style="background:rgba(139,92,246,0.15);color:var(--accent-purple)"><i class="bi bi-trophy-fill"></i></div>
+              <div class="stat-label">Transaksi ≥50K (Eligible PWP)</div>
+              <div class="stat-value" id="pwpTier2Count">0</div>
+              <div class="stat-sub" id="pwpTier2Percent">0% dari total</div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)">
+                <small style="color:var(--text-muted)">Exclude: Minyak, Susu Bayi, Rokok</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 col-xl-4">
+            <div class="stat-card green">
+              <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:var(--accent-green)"><i class="bi bi-calculator-fill"></i></div>
+              <div class="stat-label">Rata-rata Belanja Customer</div>
+              <div class="stat-value text-money" id="pwpAvgPurchase">Rp 0</div>
+              <div class="stat-sub" id="pwpAvgSub">Per transaksi</div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)">
+                <small style="color:var(--text-muted)">Total transaksi: <span id="pwpTotalTx">0</span></small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-lg-6">
+            <div class="chart-box">
+              <h6><i class="bi bi-pie-chart-fill"></i> Distribusi Tier Transaksi</h6>
+              <canvas id="chartPwpTier" height="200"></canvas>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="chart-box">
+              <h6><i class="bi bi-bar-chart-fill"></i> Perbandingan Nominal per Tier</h6>
+              <canvas id="chartPwpNominal" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-lg-6">
+            <div class="data-table">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)">
+                <h6 style="margin:0;font-weight:700"><i class="bi bi-list-check" style="color:var(--accent-blue)"></i> Detail Transaksi 20K - &lt;50K</h6>
+              </div>
+              <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+                <table class="table">
+                  <thead>
+                    <tr><th>Faktur</th><th>Waktu</th><th>Total</th><th>Items</th></tr>
+                  </thead>
+                  <tbody id="pwpTier1Body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="data-table">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)">
+                <h6 style="margin:0;font-weight:700"><i class="bi bi-list-stars" style="color:var(--accent-purple)"></i> Detail Transaksi ≥50K (Eligible)</h6>
+              </div>
+              <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+                <table class="table">
+                  <thead>
+                    <tr><th>Faktur</th><th>Waktu</th><th>Total</th><th>Items</th></tr>
+                  </thead>
+                  <tbody id="pwpTier2Body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-12">
+            <div class="stat-card">
+              <h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-info-circle-fill"></i> Kriteria Analisis PWP</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px">
+                    <div style="font-weight:600;color:var(--accent-blue);margin-bottom:8px"><i class="bi bi-cart-check"></i> Tier 1: 20K - &lt;50K</div>
+                    <ul style="margin:0;padding-left:20px;font-size:13px;color:var(--text-secondary)">
+                      <li>Semua transaksi dengan total Rp 20.000 - Rp 49.999</li>
+                      <li>Tanpa pengecualian produk</li>
+                      <li>Semua kategori dihitung</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px">
+                    <div style="font-weight:600;color:var(--accent-purple);margin-bottom:8px"><i class="bi bi-trophy"></i> Tier 2: ≥50K (PWP Eligible)</div>
+                    <ul style="margin:0;padding-left:20px;font-size:13px;color:var(--text-secondary)">
+                      <li>Transaksi dengan total ≥ Rp 50.000</li>
+                      <li><strong>EXCLUDE:</strong> Minyak goreng, Susu bayi &lt;1 tahun, Rokok</li>
+                      <li>Hanya transaksi dengan produk non-eksclusi</li>
+                      <li>Eligible untuk program PWP/Tebus Murah</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="page" id="page-payments">
         <div class="row g-3 mb-4">
           <div class="col-md-4"><div class="chart-box"><h6><i class="bi bi-pie-chart-fill"></i> Distribusi Pembayaran</h6><canvas id="chartPayDist" height="220"></canvas></div></div>
@@ -701,7 +832,7 @@ body {
           <div class="upload-icon"><i class="bi bi-arrow-repeat"></i></div>
           <h5 style="font-weight:700">Ganti Database</h5>
           <p style="color:var(--text-muted);margin:8px 0 20px">Upload file database SQLite yang baru</p>
-          <input type="file" id="fileInput2" accept=".db,.sqlite" style="display:none">
+          <input type="file" id="fileInput2" accept=".db,.sqlite,.zip" style="display:none">
           <button class="btn btn-primary-custom" onclick="document.getElementById('fileInput2').click()"><i class="bi bi-folder2-open"></i> Pilih File Baru</button>
         </div>
       </div>
@@ -751,9 +882,9 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 /* ============================================================
-   URL APPS SCRIPT (SUDAH DI-UPDATE)
+   URL APPS SCRIPT (GANTI DENGAN URL LO)
    ============================================================ */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzH6HBs-WFHTjm7bpyJ7lI4TTB9hdS2yzSIMrfkn1r-NSOhINPWI6tn8TSg_95UWTtlRg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjMdpDjGG7OaNbUQdbyroKOx14Z6KxhSu9Z_cw6WsYG6PbFtvGI3fbad2-O6tT9P1Zng/exec';
 
 /* ============================================================
    GLOBAL STATE
@@ -795,7 +926,7 @@ async function handleLogin(e) {
     const response = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ kode_toko: kodeToko, pin: pin })
+      body: JSON.stringify({ action: 'login', kode_toko: kodeToko, pin: pin })
     });
     
     const result = await response.json();
@@ -950,7 +1081,7 @@ function fmtDateTime(date, time) {
 }
 
 /* ============================================================
-   SQL LOADER
+   SQL LOADER & ZIP EXTRACTOR
    ============================================================ */
 async function initSqlJsLib(cfg) { return await window.initSqlJs(cfg); }
 
@@ -969,21 +1100,53 @@ async function loadDatabase(file) {
 
   try {
     setProgress(10, 'Membaca file...', file.name);
-    const buf = await file.arrayBuffer();
-    setProgress(30, 'Memuat SQLite engine...', 'Inisialisasi sql.js');
+    
+    let finalFileData = null;
+    let finalFileName = file.name;
+    
+    if (file.name.toLowerCase().endsWith('.zip')) {
+      setProgress(20, 'Mengekstrak ZIP...', 'Mencari file database');
+      const zip = await JSZip.loadAsync(file);
+      
+      let dbFile = null;
+      zip.forEach((relativePath, zipEntry) => {
+        if (!zipEntry.dir && (relativePath.toLowerCase().endsWith('.db') || relativePath.toLowerCase().endsWith('.sqlite'))) {
+          dbFile = zipEntry;
+        }
+      });
+
+      if (dbFile) {
+        setProgress(40, 'File database ditemukan!', 'Extracting: ' + dbFile.name);
+        finalFileData = await dbFile.async('arraybuffer');
+        finalFileName = dbFile.name;
+      } else {
+        throw new Error('Tidak ada file .db atau .sqlite di dalam ZIP ini!');
+      }
+    } else {
+      setProgress(30, 'Memuat file database...', file.name);
+      finalFileData = await file.arrayBuffer();
+    }
+    
+    setProgress(50, 'Memuat SQLite engine...', 'Inisialisasi sql.js');
     if (!SQLLib) SQLLib = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-    setProgress(50, 'Parsing database...', 'Membaca struktur tabel');
-    DB = new SQLLib.Database(new Uint8Array(buf));
+    
+    setProgress(60, 'Parsing database...', 'Membaca struktur tabel');
+    DB = new SQLLib.Database(new Uint8Array(finalFileData));
+    
     setProgress(70, 'Mengekstrak data...', 'Membaca tabel transaksi');
     await extractData();
+    
     setProgress(90, 'Merender dashboard...', 'Menyiapkan tampilan');
     await new Promise(r => setTimeout(r, 300));
+    
     setProgress(100, 'Selesai!', `${DATA.tsale.length} transaksi dimuat`);
     await new Promise(r => setTimeout(r, 500));
+    
     document.getElementById('uploadScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'flex';
-    document.getElementById('dbInfo').textContent = file.name;
+    document.getElementById('dbInfo').textContent = finalFileName;
     renderAll();
+    
   } catch (e) {
     console.error(e);
     alert('Gagal memuat database: ' + e.message);
@@ -1117,6 +1280,210 @@ function computeHourly() {
 }
 
 /* ============================================================
+   PWP ANALYSIS
+   ============================================================ */
+function isExcludedProduct(plu, name) {
+  const nameLower = (name || '').toLowerCase();
+  const pluStr = String(plu || '');
+  
+  // ROKOK
+  if (pluStr.startsWith('24') || pluStr.startsWith('25') || 
+      nameLower.includes('rokok') || nameLower.includes('sigaret') || 
+      nameLower.includes('cigarette') || nameLower.includes('marlboro') ||
+      nameLower.includes('djarum') || nameLower.includes('gudang garam') ||
+      nameLower.includes('surya') || nameLower.includes('sampoerna') ||
+      nameLower.includes('lucky strike') || nameLower.includes('dunhill') ||
+      nameLower.includes('mild') || nameLower.includes('filter')) {
+    return true;
+  }
+  
+  // MINYAK GORENG
+  if (nameLower.includes('minyak goreng') || nameLower.includes('minyakita') ||
+      nameLower.includes('bimoli') || nameLower.includes('sania') ||
+      nameLower.includes('fortune') || nameLower.includes('filma') ||
+      nameLower.includes('tropical') || nameLower.includes('sovy') ||
+      nameLower.includes('rose brand') || nameLower.includes('raja')) {
+    return true;
+  }
+  
+  // SUSU BAYI < 1 TAHUN
+  if (nameLower.includes('susu bayi') || nameLower.includes('infant formula') ||
+      nameLower.includes('formula 1') || nameLower.includes('step 1') ||
+      nameLower.includes('sgm') || nameLower.includes('dancow') ||
+      nameLower.includes('lactogen') || nameLower.includes('bebelac') ||
+      nameLower.includes('chil-go') || nameLower.includes('pediasure') ||
+      nameLower.includes('nan') || nameLower.includes('enfamil') ||
+      nameLower.includes('similac') || nameLower.includes('0-6') ||
+      nameLower.includes('0-12') || nameLower.includes('infant') ||
+      nameLower.includes('bayi') || nameLower.includes('prenagen') ||
+      nameLower.includes('morinaga') || nameLower.includes('s26')) {
+    if (nameLower.includes('0-6') || nameLower.includes('0-12') || 
+        nameLower.includes('infant') || nameLower.includes('bayi') ||
+        nameLower.includes('step 1') || nameLower.includes('formula 1')) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+function analyzePWP() {
+  const tier1 = [];
+  const tier2 = [];
+  const excludedTx = [];
+  
+  DATA.tsale.forEach(tx => {
+    const total = tx.total_faktur || 0;
+    
+    if (total >= 20000 && total < 50000) {
+      tier1.push(tx);
+    }
+    
+    if (total >= 50000) {
+      const items = DATA.trans.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur);
+      
+      let hasExcludedProduct = false;
+      let excludedProducts = [];
+      items.forEach(item => {
+        const plu = String(item.plu);
+        const name = DATA.pluNames[plu] || '';
+        if (isExcludedProduct(plu, name)) {
+          hasExcludedProduct = true;
+          excludedProducts.push(name);
+        }
+      });
+      
+      if (!hasExcludedProduct) {
+        tier2.push(tx);
+      } else {
+        excludedTx.push({ tx, excludedProducts });
+      }
+    }
+  });
+  
+  return { tier1, tier2, excludedTx };
+}
+
+function renderPWPAnalysis() {
+  const { tier1, tier2, excludedTx } = analyzePWP();
+  const totalTx = DATA.tsale.length;
+  const totalSales = DATA.tsale.reduce((s,t) => s + (t.total_faktur||0), 0);
+  const avgPurchase = totalTx > 0 ? totalSales / totalTx : 0;
+  
+  const tier1Total = tier1.reduce((s,t) => s + (t.total_faktur||0), 0);
+  const tier2Total = tier2.reduce((s,t) => s + (t.total_faktur||0), 0);
+  
+  document.getElementById('pwpTier1Count').textContent = tier1.length.toLocaleString('id-ID');
+  document.getElementById('pwpTier1Percent').textContent = 
+    totalTx > 0 ? ((tier1.length / totalTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
+  
+  document.getElementById('pwpTier2Count').textContent = tier2.length.toLocaleString('id-ID');
+  document.getElementById('pwpTier2Percent').textContent = 
+    totalTx > 0 ? ((tier2.length / totalTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
+  
+  document.getElementById('pwpAvgPurchase').textContent = fmtRp(avgPurchase);
+  document.getElementById('pwpAvgSub').textContent = 'Per transaksi';
+  document.getElementById('pwpTotalTx').textContent = totalTx.toLocaleString('id-ID');
+  
+  document.getElementById('pwpTier1Body').innerHTML = tier1.slice(0, 50).map(tx => {
+    const items = DATA.trans.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur);
+    return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')">
+      <td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td>
+      <td>${escHtml(tx.time_tx||'-')}</td>
+      <td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td>
+      <td><span class="badge-soft badge-blue">${items.length} items</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
+  
+  document.getElementById('pwpTier2Body').innerHTML = tier2.slice(0, 50).map(tx => {
+    const items = DATA.trans.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur);
+    return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')">
+      <td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td>
+      <td>${escHtml(tx.time_tx||'-')}</td>
+      <td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td>
+      <td><span class="badge-soft badge-purple">${items.length} items</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
+  
+  renderPWPCharts(tier1, tier2, excludedTx, tier1Total, tier2Total);
+}
+
+function renderPWPCharts(tier1, tier2, excludedTx, tier1Total, tier2Total) {
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#9ca3af' : '#475569';
+  const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)';
+  
+  // Pie Chart: Distribusi Tier
+  if (charts.pwpTier) charts.pwpTier.destroy();
+  charts.pwpTier = new Chart(document.getElementById('chartPwpTier').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['20K - <50K', '≥50K (Eligible)', '≥50K (Excluded)', '<20K'],
+      datasets: [{
+        data: [
+          tier1.length,
+          tier2.length,
+          excludedTx.length,
+          DATA.tsale.length - tier1.length - tier2.length - excludedTx.length
+        ],
+        backgroundColor: ['#3b82f6', '#8b5cf6', '#ef4444', '#6b7280'],
+        borderWidth: 2,
+        borderColor: isDark ? '#1a2234' : '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: textColor, padding: 12 } }
+      }
+    }
+  });
+  
+  // Bar Chart: Perbandingan Nominal
+  if (charts.pwpNominal) charts.pwpNominal.destroy();
+  charts.pwpNominal = new Chart(document.getElementById('chartPwpNominal').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['20K - <50K', '≥50K (Eligible)'],
+      datasets: [{
+        label: 'Total Nominal',
+        data: [tier1Total, tier2Total],
+        backgroundColor: ['rgba(59,130,246,0.6)', 'rgba(139,92,246,0.6)'],
+        borderColor: ['#3b82f6', '#8b5cf6'],
+        borderWidth: 2,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' },
+          grid: { color: gridColor }
+        },
+        x: {
+          ticks: { color: textColor },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+/* ============================================================
    RENDER
    ============================================================ */
 function renderAll() {
@@ -1130,6 +1497,7 @@ function renderAll() {
   renderApiLog();
   renderReport(stats);
   renderSettings();
+  renderPWPAnalysis();
   document.getElementById('storeLabel').textContent = `${DATA.storeId} • ${DATA.storeName}`;
 }
 
@@ -1392,6 +1760,7 @@ const pageTitles = {
   transactions: ['Transaksi', 'Daftar seluruh transaksi penjualan'],
   products: ['Produk', 'Ranking dan analisis produk'],
   cashiers: ['Kasir', 'Statistik dan aktivitas kasir'],
+  'pwp-analysis': ['Analisis PWP', 'Segmentasi transaksi untuk program Promo With Purchase'],
   payments: ['Pembayaran', 'Analisis metode pembayaran'],
   monitoring: ['Monitoring Sync', 'Status sinkronisasi transaksi'],
   apilog: ['API Log', 'Log koneksi API POS'],
@@ -1428,7 +1797,12 @@ function setTheme(theme) {
   document.body.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
   renderSettings();
-  if (DATA.tsale.length > 0) { const stats = computeStats(); renderCharts(stats); renderReport(stats); }
+  if (DATA.tsale.length > 0) { 
+    const stats = computeStats(); 
+    renderCharts(stats); 
+    renderReport(stats);
+    renderPWPAnalysis();
+  }
 }
 
 /* ============================================================
