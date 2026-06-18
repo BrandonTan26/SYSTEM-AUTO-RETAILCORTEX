@@ -12,46 +12,145 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root {
-  --bg-primary: #0a0e1a; --bg-secondary: #111827; --bg-card: #1a2234; --bg-card-hover: #1f2940;
-  --border-color: #2a3550; --text-primary: #e5e7eb; --text-secondary: #9ca3af; --text-muted: #6b7280;
-  --accent-green: #10b981; --accent-blue: #3b82f6; --accent-purple: #8b5cf6; --accent-orange: #f59e0b;
-  --accent-red: #ef4444; --accent-cyan: #06b6d4;
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2234;
+  --bg-card-hover: #1f2940;
+  --border-color: #2a3550;
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-green: #10b981;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-cyan: #06b6d4;
 }
 [data-theme="light"] {
-  --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-card: #ffffff; --bg-card-hover: #f1f5f9;
-  --border-color: #e2e8f0; --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 }
 * { box-sizing: border-box; }
-body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; transition: background 0.3s, color 0.3s; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 
 .app-wrapper { display: flex; min-height: 100vh; flex-direction: column; }
-.sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border-color); position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; transition: transform 0.3s; }
-.main-content { flex: 1; margin-left: 260px; min-height: 100vh; display: flex; flex-direction: column; }
-.topbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 14px 24px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; }
+.sidebar {
+  width: 260px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+  transition: transform 0.3s;
+}
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 14px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 .content-area { padding: 24px; flex: 1; }
 
-.app-footer { background: var(--bg-secondary); border-top: 1px solid var(--border-color); padding: 20px 24px; text-align: center; margin-top: auto; }
+.app-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 20px 24px;
+  text-align: center;
+  margin-top: auto;
+}
 .footer-content { max-width: 800px; margin: 0 auto; }
 .footer-brand { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
 .footer-tagline { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
 .footer-version { font-size: 10px; color: var(--text-secondary); }
 
-.brand-logo { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
-.brand-logo .logo-icon { width: 42px; height: 42px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+.brand-logo {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-logo .logo-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 20px;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
 .brand-logo .brand-text h5 { margin: 0; font-size: 15px; font-weight: 700; }
 .brand-logo .brand-text small { color: var(--text-muted); font-size: 11px; }
 
 .nav-menu { padding: 16px 12px; }
-.nav-section-title { color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; margin-top: 8px; }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; color: var(--text-secondary); border-radius: 8px; cursor: pointer; transition: all 0.2s; margin-bottom: 2px; font-size: 14px; font-weight: 500; }
+.nav-section-title {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 500;
+}
 .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
-.nav-item.active { background: linear-gradient(90deg, rgba(59,130,246,0.15), transparent); color: var(--accent-blue); border-left: 3px solid var(--accent-blue); padding-left: 11px; }
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(59,130,246,0.15), transparent);
+  color: var(--accent-blue);
+  border-left: 3px solid var(--accent-blue);
+  padding-left: 11px;
+}
 .nav-item i { font-size: 16px; width: 20px; }
 
-.stat-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; transition: all 0.3s; height: 100%; position: relative; overflow: hidden; }
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
 .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
 .stat-card.green::before { background: var(--accent-green); }
 .stat-card.blue::before { background: var(--accent-blue); }
@@ -109,32 +208,135 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 .receipt-container { background: white; color: #000; font-family: 'Courier New', monospace; padding: 20px; max-width: 320px; margin: 0 auto; font-size: 12px; line-height: 1.5; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 .receipt-container pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-family: inherit; font-size: 11px; line-height: 1.4; }
 
-.login-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
-.login-box { background: white; border-radius: 20px; padding: 40px; width: 90%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.login-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+.login-box {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
 .login-header { text-align: center; margin-bottom: 30px; }
-.login-header .login-icon { width: 70px; height: 70px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 32px; margin-bottom: 16px; }
+.login-header .login-icon {
+  width: 70px; height: 70px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: white; font-size: 32px; margin-bottom: 16px;
+}
 .login-header h2 { color: #1e293b; margin: 0 0 8px 0; font-weight: 800; font-size: 24px; }
 .login-header p { color: #64748b; margin: 0; font-size: 14px; }
 
-.form-control-login { background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; font-size: 14px; transition: all 0.3s; width: 100%; }
-.form-control-login:focus { background: white; border-color: var(--accent-blue); outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+.form-control-login {
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.3s;
+  width: 100%;
+}
+.form-control-login:focus {
+  background: white;
+  border-color: var(--accent-blue);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+}
 
-.btn-login { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; color: white; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-login {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border: none;
+  color: white;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
 .btn-login:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59,130,246,0.3); }
 .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
 
-.error-message { background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 16px; display: none; font-size: 13px; text-align: center; border: 1px solid #fecaca; }
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+  font-size: 13px;
+  text-align: center;
+  border: 1px solid #fecaca;
+}
 .error-message.show { display: block; animation: shake 0.4s; }
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
-.expired-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%); display: none; align-items: center; justify-content: center; z-index: 10001; padding: 20px; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.expired-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 20px;
+}
 .expired-screen.show { display: flex; }
-.expired-box { background: white; border-radius: 20px; padding: 40px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-.expired-box .expired-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 40px; margin-bottom: 20px; }
+.expired-box {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.expired-box .expired-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: white; font-size: 40px; margin-bottom: 20px;
+}
 .expired-box h2 { color: #1e293b; margin: 0 0 12px 0; font-weight: 800; }
 .expired-box p { color: #64748b; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; }
-.expired-box .expired-detail { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #991b1b; }
-.expired-box .contact-info { background: #f1f5f9; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #475569; }
+.expired-box .expired-detail {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #991b1b;
+}
+.expired-box .contact-info {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #475569;
+}
 .expired-box .contact-info strong { color: #1e293b; }
 
 .rank-badge { width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
@@ -143,13 +345,24 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 .rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
 .rank-other { background: var(--bg-secondary); color: var(--text-secondary); }
 
-@media (max-width: 992px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; } }
+@media (max-width: 992px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+}
 
 .text-money { font-variant-numeric: tabular-nums; font-weight: 600; }
 .clickable { cursor: pointer; }
 .mono { font-family: 'Courier New', monospace; }
 
-.kpi-hero { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%); border-radius: 16px; padding: 24px; color: white; position: relative; overflow: hidden; }
+.kpi-hero {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%);
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
 [data-theme="light"] .kpi-hero { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #6366f1 100%); }
 .kpi-hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%); border-radius: 50%; }
 .kpi-hero .kpi-label { font-size: 12px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
@@ -170,7 +383,14 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); display: inline-block; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); } }
 
-.login-spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+.login-spinner {
+  width: 20px; height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+}
 .btn-login.loading .login-spinner { display: inline-block; }
 .btn-login.loading .btn-text { display: none; }
 </style>
@@ -185,41 +405,66 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
       <h2>System Analysis Dashboard</h2>
       <p>Silakan login untuk melanjutkan</p>
     </div>
-    <div id="loginError" class="error-message"><i class="bi bi-exclamation-circle-fill"></i> <span id="loginErrorText">Kode Toko atau PIN salah!</span></div>
+    <div id="loginError" class="error-message">
+      <i class="bi bi-exclamation-circle-fill"></i> <span id="loginErrorText">Kode Toko atau PIN salah!</span>
+    </div>
     <form id="loginForm" onsubmit="handleLogin(event)">
-      <div style="margin-bottom:16px"><label style="display:block;margin-bottom:8px;color:#475569;font-weight:600;font-size:14px">Kode Toko</label><input type="text" id="kodeToko" class="form-control-login" placeholder="Masukkan kode toko" required autocomplete="off"></div>
-      <div style="margin-bottom:24px"><label style="display:block;margin-bottom:8px;color:#475569;font-weight:600;font-size:14px">PIN</label><input type="password" id="pin" class="form-control-login" placeholder="Masukkan PIN" required></div>
-      <button type="submit" class="btn-login" id="btnLogin"><div class="login-spinner"></div><span class="btn-text"><i class="bi bi-box-arrow-in-right"></i> Login</span></button>
+      <div style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:8px;color:#475569;font-weight:600;font-size:14px">Kode Toko</label>
+        <input type="text" id="kodeToko" class="form-control-login" placeholder="Masukkan kode toko" required autocomplete="off">
+      </div>
+      <div style="margin-bottom:24px">
+        <label style="display:block;margin-bottom:8px;color:#475569;font-weight:600;font-size:14px">PIN</label>
+        <input type="password" id="pin" class="form-control-login" placeholder="Masukkan PIN" required>
+      </div>
+      <button type="submit" class="btn-login" id="btnLogin">
+        <div class="login-spinner"></div>
+        <span class="btn-text"><i class="bi bi-box-arrow-in-right"></i> Login</span>
+      </button>
     </form>
-    <div style="text-align:center;margin-top:20px;color:#94a3b8;font-size:12px"><i class="bi bi-shield-check"></i> Secure Login System • Powered by BrandRetailCortex</div>
+    <div style="text-align:center;margin-top:20px;color:#94a3b8;font-size:12px">
+      <i class="bi bi-shield-check"></i> Secure Login System • Powered by BrandRetailCortex
+    </div>
   </div>
 </div>
 
-<!-- Expired Screen -->
+<!-- Expired / Suspended Screen -->
 <div id="expiredScreen" class="expired-screen">
   <div class="expired-box">
     <div class="expired-icon"><i class="bi bi-x-circle-fill"></i></div>
     <h2>Akses Ditolak</h2>
     <p id="expiredMessage">Masa sewa Anda telah habis atau akun dinonaktifkan.</p>
-    <div class="expired-detail"><i class="bi bi-info-circle-fill"></i> Silakan hubungi admin untuk perpanjangan sewa.</div>
-    <div class="contact-info"><strong>📞 Hubungi Admin:</strong><br><span>WhatsApp: 0812-XXXX-XXXX</span></div>
-    <button class="btn-login" onclick="backToLogin()" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="bi bi-arrow-left"></i> Kembali ke Login</button>
+    <div class="expired-detail" id="expiredDetail">
+      <i class="bi bi-info-circle-fill"></i> Silakan hubungi admin untuk perpanjangan sewa.
+    </div>
+    <div class="contact-info">
+      <strong>📞 Hubungi Admin:</strong><br>
+      <span id="adminContact">WhatsApp: 0812-XXXX-XXXX</span>
+    </div>
+    <button class="btn-login" onclick="backToLogin()" style="background:linear-gradient(135deg,#64748b,#475569)">
+      <i class="bi bi-arrow-left"></i> Kembali ke Login
+    </button>
   </div>
 </div>
 
 <!-- Loading Screen -->
 <div id="loadingScreen" class="loading-screen" style="display:none">
   <div class="spinner-custom"></div>
-  <div style="text-align:center"><h5 style="margin:0;font-weight:700">System Dashboard</h5><small style="color:var(--text-muted)">Memuat engine SQLite...</small></div>
+  <div style="text-align:center">
+    <h5 style="margin:0;font-weight:700">System Dashboard</h5>
+    <small style="color:var(--text-muted)">Memuat engine SQLite...</small>
+  </div>
 </div>
 
 <!-- Upload Screen -->
 <div id="uploadScreen" style="display:none;min-height:100vh;align-items:center;justify-content:center;padding:20px">
   <div style="max-width:600px;width:100%">
     <div style="text-align:center;margin-bottom:30px">
-      <div style="width:70px;height:70px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:32px;margin-bottom:16px"><i class="bi bi-database-fill-gear"></i></div>
+      <div style="width:70px;height:70px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:32px;margin-bottom:16px">
+        <i class="bi bi-database-fill-gear"></i>
+      </div>
       <h2 style="font-weight:800;margin:0">System Dashboard</h2>
-      <p style="color:var(--text-muted);margin-top:8px">Upload database SQLite POS Anda</p>
+      <p style="color:var(--text-muted);margin-top:8px">Upload database SQLite POS Alfamart Anda</p>
       <div id="welcomeInfo" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:16px;margin-top:20px;text-align:left">
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Login sebagai:</div>
         <div style="font-weight:700;font-size:15px" id="welcomeKode">-</div>
@@ -232,16 +477,25 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
       <h5 style="font-weight:700">Drop file .db / .sqlite / .zip di sini</h5>
       <p style="color:var(--text-muted);margin:8px 0 20px">atau klik untuk memilih file dari perangkat Anda</p>
       <input type="file" id="fileInput" accept=".db,.sqlite,.zip" style="display:none">
-      <button class="btn btn-primary-custom" onclick="document.getElementById('fileInput').click()"><i class="bi bi-folder2-open"></i> Pilih File Database</button>
-      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">Support: .db, .sqlite, .zip (Auto-extract)</div>
+      <button class="btn btn-primary-custom" onclick="document.getElementById('fileInput').click()">
+        <i class="bi bi-folder2-open"></i> Pilih File Database
+      </button>
+      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">
+        Support: .db, .sqlite, .zip (Auto-extract)
+      </div>
     </div>
     <div id="uploadProgress" style="display:none;margin-top:20px">
       <div class="stat-card">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
           <div class="spinner-custom" style="width:30px;height:30px;border-width:3px"></div>
-          <div><div style="font-weight:600" id="uploadStatus">Memproses database...</div><small style="color:var(--text-muted)" id="uploadDetail">Mengurai tabel dan data</small></div>
+          <div>
+            <div style="font-weight:600" id="uploadStatus">Memproses database...</div>
+            <small style="color:var(--text-muted)" id="uploadDetail">Mengurai tabel dan data</small>
+          </div>
         </div>
-        <div style="height:6px;background:var(--bg-secondary);border-radius:3px;overflow:hidden"><div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));width:0%;transition:width 0.3s"></div></div>
+        <div style="height:6px;background:var(--bg-secondary);border-radius:3px;overflow:hidden">
+          <div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));width:0%;transition:width 0.3s"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -252,7 +506,10 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
   <aside class="sidebar" id="sidebar">
     <div class="brand-logo">
       <div class="logo-icon"><i class="bi bi-database-fill-gear"></i></div>
-      <div class="brand-text"><h5>System Dashboard</h5><small id="storeLabel">• POS Monitor</small></div>
+      <div class="brand-text">
+        <h5>System Dashboard</h5>
+        <small id="storeLabel">• POS Monitor</small>
+      </div>
     </div>
     <div class="nav-menu">
       <div class="nav-section-title">Overview</div>
@@ -260,7 +517,9 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
       <div class="nav-item" data-page="transactions"><i class="bi bi-receipt-cutoff"></i> Transaksi</div>
       <div class="nav-item" data-page="products"><i class="bi bi-box-seam-fill"></i> Produk</div>
       <div class="nav-item" data-page="cashiers"><i class="bi bi-people-fill"></i> Kasir</div>
+      <!-- TAMBAHAN: Menu PWP -->
       <div class="nav-item" data-page="pwp-analysis"><i class="bi bi-gift-fill"></i> Analisis PWP</div>
+      
       <div class="nav-section-title">Finance</div>
       <div class="nav-item" data-page="payments"><i class="bi bi-credit-card-2-front-fill"></i> Pembayaran</div>
       <div class="nav-section-title">System</div>
@@ -285,10 +544,11 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
-        <!-- DATE FILTER -->
+        <!-- TAMBAHAN: Filter Tanggal -->
         <select id="dateFilter" class="form-select form-select-sm" style="width: 140px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 12px;">
           <option value="">Semua Tanggal</option>
         </select>
+        
         <span class="badge-soft badge-green"><span class="live-dot"></span> LIVE</span>
         <span class="badge-soft badge-blue" id="dbInfo">-</span>
         <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()"></div>
@@ -296,7 +556,6 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
     </div>
 
     <div class="content-area">
-      <!-- Dashboard Page -->
       <div class="page active" id="page-dashboard">
         <div class="kpi-hero mb-4">
           <div style="position:relative;z-index:1">
@@ -349,7 +608,6 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
         </div>
       </div>
 
-      <!-- Transactions Page -->
       <div class="page" id="page-transactions">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <div><input type="text" class="form-control" id="txSearch" placeholder="Cari faktur / kasir..." style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-primary);width:280px"></div>
@@ -358,7 +616,6 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
         <div class="data-table"><div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Waktu</th><th>Kasir</th><th>Item</th><th style="text-align:right">Total</th><th style="text-align:right">Cash</th><th style="text-align:right">Kembalian</th><th>Metode</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="txTableBody"></tbody></table></div></div>
       </div>
 
-      <!-- Products Page -->
       <div class="page" id="page-products">
         <div class="row g-3 mb-3">
           <div class="col-md-3"><div class="stat-card"><div class="stat-label">Total Produk Unik</div><div class="stat-value" id="prodUnique">0</div></div></div>
@@ -377,14 +634,15 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 
       <div class="page" id="page-cashiers"><div class="row g-3" id="cashierGrid"></div></div>
 
-      <!-- PWP Analysis Page -->
+      <!-- TAMBAHAN: Halaman Analisis PWP -->
       <div class="page" id="page-pwp-analysis">
         <div class="kpi-hero mb-4">
           <div style="position:relative;z-index:1">
             <div class="kpi-label"><i class="bi bi-gift-fill"></i> Analisis PWP & Customer Value</div>
-            <div class="kpi-sub">Segmentasi transaksi untuk program Promo With Purchase (Filter Tanggal Aktif)</div>
+            <div class="kpi-sub">Segmentasi transaksi untuk program Promo With Purchase</div>
           </div>
         </div>
+
         <div class="row g-3 mb-4">
           <div class="col-md-6 col-xl-4">
             <div class="stat-card blue">
@@ -392,7 +650,9 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
               <div class="stat-label">Transaksi 20K - &lt;50K</div>
               <div class="stat-value" id="pwpTier1Count">0</div>
               <div class="stat-sub" id="pwpTier1Percent">0% dari total</div>
-              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)"><small style="color:var(--text-muted)">Semua kategori produk</small></div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)">
+                <small style="color:var(--text-muted)">Semua kategori produk</small>
+              </div>
             </div>
           </div>
           <div class="col-md-6 col-xl-4">
@@ -401,7 +661,9 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
               <div class="stat-label">Transaksi ≥50K (Eligible PWP)</div>
               <div class="stat-value" id="pwpTier2Count">0</div>
               <div class="stat-sub" id="pwpTier2Percent">0% dari total</div>
-              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)"><small style="color:var(--text-muted)">Exclude: Minyak, Susu Bayi, Rokok</small></div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)">
+                <small style="color:var(--text-muted)">Exclude: Minyak, Susu Bayi, Rokok</small>
+              </div>
             </div>
           </div>
           <div class="col-md-12 col-xl-4">
@@ -410,35 +672,87 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
               <div class="stat-label">Rata-rata Belanja Customer</div>
               <div class="stat-value text-money" id="pwpAvgPurchase">Rp 0</div>
               <div class="stat-sub" id="pwpAvgSub">Per transaksi</div>
-              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)"><small style="color:var(--text-muted)">Total transaksi: <span id="pwpTotalTx">0</span></small></div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color)">
+                <small style="color:var(--text-muted)">Total transaksi: <span id="pwpTotalTx">0</span></small>
+              </div>
             </div>
           </div>
         </div>
+
         <div class="row g-3 mb-4">
-          <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-pie-chart-fill"></i> Distribusi Tier Transaksi</h6><canvas id="chartPwpTier" height="200"></canvas></div></div>
-          <div class="col-lg-6"><div class="chart-box"><h6><i class="bi bi-bar-chart-fill"></i> Perbandingan Nominal per Tier</h6><canvas id="chartPwpNominal" height="200"></canvas></div></div>
+          <div class="col-lg-6">
+            <div class="chart-box">
+              <h6><i class="bi bi-pie-chart-fill"></i> Distribusi Tier Transaksi</h6>
+              <canvas id="chartPwpTier" height="200"></canvas>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="chart-box">
+              <h6><i class="bi bi-bar-chart-fill"></i> Perbandingan Nominal per Tier</h6>
+              <canvas id="chartPwpNominal" height="200"></canvas>
+            </div>
+          </div>
         </div>
+
         <div class="row g-3 mb-4">
           <div class="col-lg-6">
             <div class="data-table">
-              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-list-check" style="color:var(--accent-blue)"></i> Detail Transaksi 20K - &lt;50K</h6></div>
-              <div style="overflow-x:auto;max-height:400px;overflow-y:auto"><table class="table"><thead><tr><th>Faktur</th><th>Waktu</th><th>Total</th><th>Items</th></tr></thead><tbody id="pwpTier1Body"></tbody></table></div>
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)">
+                <h6 style="margin:0;font-weight:700"><i class="bi bi-list-check" style="color:var(--accent-blue)"></i> Detail Transaksi 20K - &lt;50K</h6>
+              </div>
+              <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+                <table class="table">
+                  <thead>
+                    <tr><th>Faktur</th><th>Waktu</th><th>Total</th><th>Items</th></tr>
+                  </thead>
+                  <tbody id="pwpTier1Body"></tbody>
+                </table>
+              </div>
             </div>
           </div>
           <div class="col-lg-6">
             <div class="data-table">
-              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-list-stars" style="color:var(--accent-purple)"></i> Detail Transaksi ≥50K (Eligible)</h6></div>
-              <div style="overflow-x:auto;max-height:400px;overflow-y:auto"><table class="table"><thead><tr><th>Faktur</th><th>Waktu</th><th>Total</th><th>Items</th></tr></thead><tbody id="pwpTier2Body"></tbody></table></div>
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)">
+                <h6 style="margin:0;font-weight:700"><i class="bi bi-list-stars" style="color:var(--accent-purple)"></i> Detail Transaksi ≥50K (Eligible)</h6>
+              </div>
+              <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+                <table class="table">
+                  <thead>
+                    <tr><th>Faktur</th><th>Waktu</th><th>Total</th><th>Items</th></tr>
+                  </thead>
+                  <tbody id="pwpTier2Body"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
+
         <div class="row g-3">
           <div class="col-lg-12">
             <div class="stat-card">
-              <h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-info-circle-fill"></i> Kriteria Analisis PWP</h6>
+              <h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-info-circle-fill"></i> Kriteria Analisis</h6>
               <div class="row g-3">
-                <div class="col-md-6"><div style="background:var(--bg-secondary);padding:16px;border-radius:8px"><div style="font-weight:600;color:var(--accent-blue);margin-bottom:8px"><i class="bi bi-cart-check"></i> Tier 1: 20K - &lt;50K</div><ul style="margin:0;padding-left:20px;font-size:13px;color:var(--text-secondary)"><li>Semua transaksi dengan total Rp 20.000 - Rp 49.999</li><li>Tanpa pengecualian produk</li></ul></div></div>
-                <div class="col-md-6"><div style="background:var(--bg-secondary);padding:16px;border-radius:8px"><div style="font-weight:600;color:var(--accent-purple);margin-bottom:8px"><i class="bi bi-trophy"></i> Tier 2: ≥50K (PWP Eligible)</div><ul style="margin:0;padding-left:20px;font-size:13px;color:var(--text-secondary)"><li>Transaksi dengan total ≥ Rp 50.000</li><li><strong>EXCLUDE:</strong> Minyak goreng, Susu bayi &lt;1 tahun, Rokok</li><li>Eligible untuk program PWP/Tebus Murah</li></ul></div></div>
+                <div class="col-md-6">
+                  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px">
+                    <div style="font-weight:600;color:var(--accent-blue);margin-bottom:8px"><i class="bi bi-cart-check"></i> Tier 1: 20K - &lt;50K</div>
+                    <ul style="margin:0;padding-left:20px;font-size:13px;color:var(--text-secondary)">
+                      <li>Semua transaksi dengan total Rp 20.000 - Rp 49.999</li>
+                      <li>Tanpa pengecualian produk</li>
+                      <li>Semua kategori dihitung</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px">
+                    <div style="font-weight:600;color:var(--accent-purple);margin-bottom:8px"><i class="bi bi-trophy"></i> Tier 2: ≥50K (PWP Eligible)</div>
+                    <ul style="margin:0;padding-left:20px;font-size:13px;color:var(--text-secondary)">
+                      <li>Transaksi dengan total ≥ Rp 50.000</li>
+                      <li><strong>EXCLUDE:</strong> Minyak goreng, Susu bayi &lt;1 tahun, Rokok</li>
+                      <li>Hanya transaksi dengan produk non-eksclusi</li>
+                      <li>Eligible untuk program PWP/Tebus Murah</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -455,7 +769,10 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
           <div class="col-md-4"><div class="stat-card cyan"><div class="stat-label">Total Wallet</div><div class="stat-value text-money" id="payWallet">Rp 0</div></div></div>
           <div class="col-md-4"><div class="stat-card purple"><div class="stat-label">Total Kartu</div><div class="stat-value text-money" id="payCard">Rp 0</div></div></div>
         </div>
-        <div class="data-table"><div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-wallet2"></i> Detail Transaksi Wallet</h6></div><div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Wallet ID</th><th>Customer</th><th style="text-align:right">Nominal</th><th>Status</th><th>Waktu</th></tr></thead><tbody id="walletTableBody"></tbody></table></div></div>
+        <div class="data-table">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-wallet2"></i> Detail Transaksi Wallet</h6></div>
+          <div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Wallet ID</th><th>Customer</th><th style="text-align:right">Nominal</th><th>Status</th><th>Waktu</th></tr></thead><tbody id="walletTableBody"></tbody></table></div>
+        </div>
       </div>
 
       <div class="page" id="page-monitoring">
@@ -464,7 +781,10 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
           <div class="col-md-4"><div class="stat-card orange"><div class="stat-label"><i class="bi bi-hourglass-split"></i> Pending</div><div class="stat-value" id="monPending">0</div></div></div>
           <div class="col-md-4"><div class="stat-card red"><div class="stat-label"><i class="bi bi-x-circle-fill"></i> Gagal</div><div class="stat-value" id="monFailed">0</div></div></div>
         </div>
-        <div class="data-table"><div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-cloud-check-fill"></i> Log Sinkronisasi Transaksi</h6></div><div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Status</th><th>Tanggal Sync</th><th>Waktu Sync</th><th>Response</th></tr></thead><tbody id="syncTableBody"></tbody></table></div></div>
+        <div class="data-table">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border-color)"><h6 style="margin:0;font-weight:700"><i class="bi bi-cloud-check-fill"></i> Log Sinkronisasi Transaksi</h6></div>
+          <div style="overflow-x:auto"><table class="table"><thead><tr><th>Faktur</th><th>Status</th><th>Tanggal Sync</th><th>Waktu Sync</th><th>Response</th></tr></thead><tbody id="syncTableBody"></tbody></table></div>
+        </div>
       </div>
 
       <div class="page" id="page-apilog">
@@ -490,12 +810,23 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 
       <div class="page" id="page-settings">
         <div class="row g-3">
-          <div class="col-md-6"><div class="stat-card"><h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-info-circle-fill"></i> Informasi Database</h6><div id="dbInfoContent"></div></div></div>
+          <div class="col-md-6">
+            <div class="stat-card">
+              <h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-info-circle-fill"></i> Informasi Database</h6>
+              <div id="dbInfoContent"></div>
+            </div>
+          </div>
           <div class="col-md-6">
             <div class="stat-card">
               <h6 style="font-weight:700;margin-bottom:16px"><i class="bi bi-palette-fill"></i> Tampilan</h6>
-              <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-secondary);border-radius:8px;margin-bottom:12px"><div><div style="font-weight:600">Dark Mode</div><small style="color:var(--text-muted)">Tampilan gelap</small></div><div class="theme-toggle" id="darkToggle" onclick="setTheme('dark')"></div></div>
-              <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-secondary);border-radius:8px"><div><div style="font-weight:600">Light Mode</div><small style="color:var(--text-muted)">Tampilan terang</small></div><div class="theme-toggle" id="lightToggle" onclick="setTheme('light')"></div></div>
+              <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-secondary);border-radius:8px;margin-bottom:12px">
+                <div><div style="font-weight:600">Dark Mode</div><small style="color:var(--text-muted)">Tampilan gelap</small></div>
+                <div class="theme-toggle" id="darkToggle" onclick="setTheme('dark')"></div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-secondary);border-radius:8px">
+                <div><div style="font-weight:600">Light Mode</div><small style="color:var(--text-muted)">Tampilan terang</small></div>
+                <div class="theme-toggle" id="lightToggle" onclick="setTheme('light')"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -522,98 +853,338 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
   </div>
 </div>
 
-<!-- Modals -->
-<div class="modal fade modal-custom" id="txModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="bi bi-receipt-cutoff"></i> Detail Transaksi <span id="txModalFaktur" class="mono"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="txModalBody"></div><div class="modal-footer"><button class="btn-custom" onclick="showReceiptFromModal()"><i class="bi bi-receipt"></i> Lihat Struk</button><button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button></div></div></div></div>
-<div class="modal fade modal-custom" id="receiptModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="bi bi-receipt"></i> Struk POS</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" style="background:#1f2937"><div class="receipt-container" id="receiptContent"></div><div style="text-align:center;margin-top:20px"><button class="btn btn-primary-custom" onclick="downloadReceiptAsImage()"><i class="bi bi-download"></i> Download sebagai Gambar</button></div></div></div></div></div>
-<div class="modal fade modal-custom" id="apiModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="bi bi-terminal-fill"></i> API Request / Response</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="apiModalBody"></div></div></div></div>
+<!-- Modal: Transaction Detail -->
+<div class="modal fade modal-custom" id="txModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-receipt-cutoff"></i> Detail Transaksi <span id="txModalFaktur" class="mono"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="txModalBody"></div>
+      <div class="modal-footer"><button class="btn-custom" onclick="showReceiptFromModal()"><i class="bi bi-receipt"></i> Lihat Struk</button><button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Receipt -->
+<div class="modal fade modal-custom" id="receiptModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-receipt"></i> Struk POS</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" style="background:#1f2937"><div class="receipt-container" id="receiptContent"></div><div style="text-align:center;margin-top:20px"><button class="btn btn-primary-custom" onclick="downloadReceiptAsImage()"><i class="bi bi-download"></i> Download sebagai Gambar</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: API Detail -->
+<div class="modal fade modal-custom" id="apiModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-terminal-fill"></i> API Request / Response</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="apiModalBody"></div>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+/* ============================================================
+   URL APPS SCRIPT (SUDAH DI-UPDATE)
+   ============================================================ */
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjMdpDjGG7OaNbUQdbyroKOx14Z6KxhSu9Z_cw6WsYG6PbFtvGI3fbad2-O6tT9P1Zng/exec';
 
-let DB = null, SQLLib = null;
-let DATA = { tsale: [], trans: [], wallet: [], card: [], receipt: [], cashier: [], login: [], sync: [], connection: [], usi: [], pluNames: {}, storeId: '2L44', storeName: 'STORE' };
-// FILTERED DATA
-let FILTERED_TSALE = [], FILTERED_TRANS = [], FILTERED_WALLET = [], FILTERED_CARD = [];
-let currentFakturModal = null, charts = {};
+/* ============================================================
+   GLOBAL STATE
+   ============================================================ */
+let DB = null;
+let SQLLib = null;
+let DATA = {
+  tsale: [], trans: [], wallet: [], card: [], receipt: [],
+  cashier: [], login: [], sync: [], connection: [], usi: [],
+  pluNames: {}, storeId: '2L44', storeName: 'BUNDARAN HI'
+};
+let currentFakturModal = null;
+let charts = {};
 
+/* ============================================================
+   LOGIN SYSTEM (Google Sheets API)
+   ============================================================ */
 async function handleLogin(e) {
   e.preventDefault();
+  
   const kodeToko = document.getElementById('kodeToko').value.trim();
   const pin = document.getElementById('pin').value.trim();
   const btnLogin = document.getElementById('btnLogin');
   const errorBox = document.getElementById('loginError');
   const errorText = document.getElementById('loginErrorText');
+  
   errorBox.classList.remove('show');
-  btnLogin.classList.add('loading'); btnLogin.disabled = true;
+  
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PASTE_URL')) {
+    errorText.textContent = '⚠️ Sistem belum dikonfigurasi. Hubungi admin.';
+    errorBox.classList.add('show');
+    return;
+  }
+  
+  btnLogin.classList.add('loading');
+  btnLogin.disabled = true;
+  
   try {
-    const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'login', kode_toko: kodeToko, pin: pin }) });
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'login', kode_toko: kodeToko, pin: pin })
+    });
+    
     const result = await response.json();
+    
     if (result.status === 'success') {
-      sessionStorage.setItem('loggedIn', 'true'); sessionStorage.setItem('kodeToko', result.kode_toko); sessionStorage.setItem('masaBerlaku', result.masa_berlaku);
-      document.getElementById('welcomeKode').textContent = result.kode_toko; document.getElementById('welcomeExpiry').textContent = result.masa_berlaku;
-      document.getElementById('loginScreen').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'flex'; initApp();
-    } else { throw new Error(result.message || 'Login gagal'); }
+      sessionStorage.setItem('loggedIn', 'true');
+      sessionStorage.setItem('kodeToko', result.kode_toko);
+      sessionStorage.setItem('masaBerlaku', result.masa_berlaku);
+      
+      document.getElementById('welcomeKode').textContent = result.kode_toko;
+      document.getElementById('welcomeExpiry').textContent = result.masa_berlaku;
+      
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('loadingScreen').style.display = 'flex';
+      initApp();
+    } else {
+      throw new Error(result.message || 'Login gagal');
+    }
+    
   } catch (error) {
+    console.error('Login error:', error);
+    
     const msg = error.message || 'Kode Toko atau PIN salah!';
-    if (msg.includes('HABIS') || msg.includes('dinonaktifkan') || msg.includes('Off')) { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('expiredMessage').textContent = msg; document.getElementById('expiredScreen').classList.add('show'); }
-    else { errorText.textContent = msg; errorBox.classList.add('show'); }
-  } finally { btnLogin.classList.remove('loading'); btnLogin.disabled = false; }
+    
+    if (msg.includes('HABIS') || msg.includes('dinonaktifkan') || msg.includes('Off')) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('expiredMessage').textContent = msg;
+      document.getElementById('expiredScreen').classList.add('show');
+    } else {
+      errorText.textContent = msg;
+      errorBox.classList.add('show');
+    }
+  } finally {
+    btnLogin.classList.remove('loading');
+    btnLogin.disabled = false;
+  }
 }
-function backToLogin() { document.getElementById('expiredScreen').classList.remove('show'); document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('loginError').classList.remove('show'); document.getElementById('kodeToko').value = ''; document.getElementById('pin').value = ''; }
-function doLogout() { if (confirm('Yakin ingin logout?')) { sessionStorage.clear(); location.reload(); } }
 
-async function verifySession(kodeToko) {
-  if (!APPS_SCRIPT_URL) return true;
-  try { const response = await fetch(`${APPS_SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify({kode_toko: kodeToko}))}`, { method: 'GET', mode: 'cors' }); const result = await response.json(); return result.status === 'success'; } catch (error) { return true; }
+function backToLogin() {
+  document.getElementById('expiredScreen').classList.remove('show');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('kodeToko').value = '';
+  document.getElementById('pin').value = '';
 }
+
+function doLogout() {
+  if (confirm('Yakin ingin logout?')) {
+    sessionStorage.clear();
+    location.reload();
+  }
+}
+
+/* ============================================================
+   VERIFIKASI REAL-TIME (AUTO-LOGOUT)
+   ============================================================ */
+async function verifySession(kodeToko) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PASTE_URL')) {
+    return true;
+  }
+  
+  try {
+    const response = await fetch(`${APPS_SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify({kode_toko: kodeToko}))}`, {
+      method: 'GET',
+      mode: 'cors'
+    });
+    const result = await response.json();
+    return result.status === 'success';
+  } catch (error) {
+    console.warn('Verifikasi gagal:', error);
+    return true;
+  }
+}
+
 async function checkAuth() {
-  if (sessionStorage.getItem('loggedIn') !== 'true') { document.getElementById('loginScreen').style.display = 'flex'; return false; }
+  if (sessionStorage.getItem('loggedIn') !== 'true') {
+    document.getElementById('loginScreen').style.display = 'flex';
+    return false;
+  }
+  
   const kodeToko = sessionStorage.getItem('kodeToko');
-  if (kodeToko) { const isValid = await verifySession(kodeToko); if (!isValid) { sessionStorage.clear(); document.getElementById('loginScreen').style.display = 'none'; document.getElementById('expiredMessage').textContent = 'Sesi Anda telah berakhir.'; document.getElementById('expiredScreen').classList.add('show'); return false; } }
+  if (kodeToko) {
+    const isValid = await verifySession(kodeToko);
+    if (!isValid) {
+      sessionStorage.clear();
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('expiredMessage').textContent = 'Sesi Anda telah berakhir atau akun dinonaktifkan.';
+      document.getElementById('expiredScreen').classList.add('show');
+      return false;
+    }
+  }
+  
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('welcomeKode').textContent = sessionStorage.getItem('kodeToko') || '-';
-  document.getElementById('welcomeExpiry').textContent = sessionStorage.getItem('masaBerlaku') || '-';
+  const kode = sessionStorage.getItem('kodeToko') || '-';
+  const expiry = sessionStorage.getItem('masaBerlaku') || '-';
+  document.getElementById('welcomeKode').textContent = kode;
+  document.getElementById('welcomeExpiry').textContent = expiry;
   return true;
 }
-function startAutoVerify() { setInterval(async () => { const kodeToko = sessionStorage.getItem('kodeToko'); if (kodeToko && sessionStorage.getItem('loggedIn') === 'true') { const isValid = await verifySession(kodeToko); if (!isValid) { sessionStorage.clear(); document.getElementById('mainApp').style.display = 'none'; document.getElementById('uploadScreen').style.display = 'none'; document.getElementById('expiredMessage').textContent = 'Akun Anda telah dinonaktifkan.'; document.getElementById('expiredScreen').classList.add('show'); } } }, 300000); }
 
+function startAutoVerify() {
+  setInterval(async () => {
+    const kodeToko = sessionStorage.getItem('kodeToko');
+    if (kodeToko && sessionStorage.getItem('loggedIn') === 'true') {
+      const isValid = await verifySession(kodeToko);
+      if (!isValid) {
+        sessionStorage.clear();
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('uploadScreen').style.display = 'none';
+        document.getElementById('expiredMessage').textContent = 'Akun Anda telah dinonaktifkan oleh Admin. Silakan hubungi admin untuk informasi lebih lanjut.';
+        document.getElementById('expiredScreen').classList.add('show');
+      }
+    }
+  }, 300000);
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
 const fmtRp = n => 'Rp ' + Math.round(n||0).toLocaleString('id-ID');
 const fmtNum = n => (n||0).toLocaleString('id-ID');
 const escHtml = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function parseTime(t) { if (!t) return null; const m = String(t).trim().match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/); return m ? { h: parseInt(m[1]), m: parseInt(m[2]), s: parseInt(m[3]||0) } : null; }
-function parseDate(d) { if (!d) return null; const s = String(d).trim(); if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) { const [dd,mm,yy] = s.split(/[\/\s]/); return new Date(`${yy}-${mm}-${dd}`); } const dt = new Date(s); return isNaN(dt) ? null : dt; }
-function fmtDateTime(date, time) { const d = parseDate(date); if (!d) return date || '-'; const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0'), yy = d.getFullYear(); const t = parseTime(time); return t ? `${dd}/${mm}/${yy} ${String(t.h).padStart(2,'0')}:${String(t.m).padStart(2,'0')}` : `${dd}/${mm}/${yy}`; }
 
+function parseTime(t) {
+  if (!t) return null;
+  const s = String(t).trim();
+  const m = s.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+  if (!m) return null;
+  return { h: parseInt(m[1]), m: parseInt(m[2]), s: parseInt(m[3]||0) };
+}
+
+function parseDate(d) {
+  if (!d) return null;
+  const s = String(d).trim();
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+    const [dd,mm,yy] = s.split(/[\/\s]/);
+    return new Date(`${yy}-${mm}-${dd}`);
+  }
+  const dt = new Date(s);
+  return isNaN(dt) ? null : dt;
+}
+
+function fmtDateTime(date, time) {
+  const d = parseDate(date);
+  const t = parseTime(time);
+  if (!d) return date || '-';
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  if (t) return `${dd}/${mm}/${yy} ${String(t.h).padStart(2,'0')}:${String(t.m).padStart(2,'0')}`;
+  return `${dd}/${mm}/${yy}`;
+}
+
+/* ============================================================
+   SQL LOADER
+   ============================================================ */
 async function initSqlJsLib(cfg) { return await window.initSqlJs(cfg); }
+
 async function loadDatabase(file) {
-  const prog = document.getElementById('uploadProgress'), bar = document.getElementById('progressBar'), status = document.getElementById('uploadStatus'), detail = document.getElementById('uploadDetail');
+  const prog = document.getElementById('uploadProgress');
+  const bar = document.getElementById('progressBar');
+  const status = document.getElementById('uploadStatus');
+  const detail = document.getElementById('uploadDetail');
   prog.style.display = 'block';
-  const setProgress = (p, s, d) => { bar.style.width = p + '%'; if (s) status.textContent = s; if (d) detail.textContent = d; };
+
+  const setProgress = (p, s, d) => {
+    bar.style.width = p + '%';
+    if (s) status.textContent = s;
+    if (d) detail.textContent = d;
+  };
+
   try {
     setProgress(10, 'Membaca file...', file.name);
-    let finalFileData = null, finalFileName = file.name;
+    
+    let finalFileData = null;
+    let finalFileName = file.name;
+    
+    // Cek apakah file ZIP
     if (file.name.toLowerCase().endsWith('.zip')) {
       setProgress(20, 'Mengekstrak ZIP...', 'Mencari file database');
-      const zip = await JSZip.loadAsync(file); let dbFile = null;
-      zip.forEach((relativePath, zipEntry) => { if (!zipEntry.dir && (relativePath.toLowerCase().endsWith('.db') || relativePath.toLowerCase().endsWith('.sqlite'))) dbFile = zipEntry; });
-      if (dbFile) { setProgress(40, 'File database ditemukan!', 'Extracting: ' + dbFile.name); finalFileData = await dbFile.async('arraybuffer'); finalFileName = dbFile.name; } else { throw new Error('Tidak ada file .db atau .sqlite di dalam ZIP!'); }
-    } else { setProgress(30, 'Memuat file database...', file.name); finalFileData = await file.arrayBuffer(); }
+      const zip = await JSZip.loadAsync(file);
+      
+      // Cari file .db atau .sqlite di dalam ZIP
+      let dbFile = null;
+      zip.forEach((relativePath, zipEntry) => {
+        if (!zipEntry.dir && (relativePath.toLowerCase().endsWith('.db') || relativePath.toLowerCase().endsWith('.sqlite'))) {
+          dbFile = zipEntry;
+        }
+      });
+
+      if (dbFile) {
+        setProgress(40, 'File database ditemukan!', 'Extracting: ' + dbFile.name);
+        finalFileData = await dbFile.async('arraybuffer');
+        finalFileName = dbFile.name;
+      } else {
+        throw new Error('Tidak ada file .db atau .sqlite di dalam ZIP ini!');
+      }
+    } 
+    // Jika file .db atau .sqlite langsung
+    else if (file.name.toLowerCase().endsWith('.db') || file.name.toLowerCase().endsWith('.sqlite')) {
+      setProgress(30, 'Memuat file database...', file.name);
+      finalFileData = await file.arrayBuffer();
+    } 
+    else {
+      throw new Error('Format file tidak didukung! Gunakan .db, .sqlite, atau .zip');
+    }
+    
     setProgress(50, 'Memuat SQLite engine...', 'Inisialisasi sql.js');
     if (!SQLLib) SQLLib = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+    
     setProgress(60, 'Parsing database...', 'Membaca struktur tabel');
     DB = new SQLLib.Database(new Uint8Array(finalFileData));
+    
     setProgress(70, 'Mengekstrak data...', 'Membaca tabel transaksi');
     await extractData();
+    
     setProgress(90, 'Merender dashboard...', 'Menyiapkan tampilan');
     await new Promise(r => setTimeout(r, 300));
+    
     setProgress(100, 'Selesai!', `${DATA.tsale.length} transaksi dimuat`);
     await new Promise(r => setTimeout(r, 500));
-    document.getElementById('uploadScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; document.getElementById('dbInfo').textContent = finalFileName;
+    
+    document.getElementById('uploadScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    document.getElementById('dbInfo').textContent = finalFileName;
     renderAll();
-  } catch (e) { console.error(e); alert('Gagal memuat database: ' + e.message); prog.style.display = 'none'; }
+    
+  } catch (e) {
+    console.error(e);
+    alert('Gagal memuat database: ' + e.message);
+    prog.style.display = 'none';
+  }
 }
-function queryAll(sql) { try { const res = DB.exec(sql); if (!res.length) return []; const cols = res[0].columns; return res[0].values.map(row => { const obj = {}; cols.forEach((c,i) => obj[c] = row[i]); return obj; }); } catch (e) { return []; } }
+
+function queryAll(sql) {
+  try {
+    const res = DB.exec(sql);
+    if (!res.length) return [];
+    const cols = res[0].columns;
+    return res[0].values.map(row => { const obj = {}; cols.forEach((c,i) => obj[c] = row[i]); return obj; });
+  } catch (e) { console.warn('Query failed:', sql, e.message); return []; }
+}
+
+// FUNGSI BANTU: Ambil Set Faktur Valid Berdasarkan Tanggal
+function getValidFakturs(date) {
+  const facturs = new Set();
+  const list = date ? DATA.tsale.filter(t => t.date_tx === date) : DATA.tsale;
+  list.forEach(t => { 
+    if (t.faktur) facturs.add(t.faktur); 
+    if (t.bill_no) facturs.add(t.bill_no); 
+  });
+  return facturs;
+}
 
 async function extractData() {
   DATA.tsale = queryAll('SELECT * FROM tx_tsale');
@@ -637,107 +1208,238 @@ async function extractData() {
   dateSelect.innerHTML = '<option value="">Semua Tanggal</option>' + dates.map(d => `<option value="${d}">${d}</option>`).join('');
   if (dates.length > 0) dateSelect.value = dates[0]; // Default to latest date
   
-  updateFilteredData();
+  renderAll();
 }
-
-function updateFilteredData() {
-  const date = document.getElementById('dateFilter').value;
-  if (!date) {
-    FILTERED_TSALE = DATA.tsale; FILTERED_TRANS = DATA.trans; FILTERED_WALLET = DATA.wallet; FILTERED_CARD = DATA.card;
-  } else {
-    FILTERED_TSALE = DATA.tsale.filter(t => t.date_tx === date);
-    const fakturs = new Set(FILTERED_TSALE.map(t => t.faktur));
-    FILTERED_TRANS = DATA.trans.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no));
-    FILTERED_WALLET = DATA.wallet.filter(w => fakturs.has(w.faktur));
-    FILTERED_CARD = DATA.card.filter(c => fakturs.has(c.faktur));
-  }
-}
-
-document.getElementById('dateFilter').addEventListener('change', () => { updateFilteredData(); renderAll(); });
 
 function extractPluNames() {
   const receiptByFaktur = {};
-  DATA.receipt.forEach(r => { const faktur = r.faktur || r.bill_no; if (!faktur) return; receiptByFaktur[faktur] = ((r.body1||'') + (r.body2||'')).split('|').filter(l => l.trim()); });
+  DATA.receipt.forEach(r => {
+    const faktur = r.faktur || r.bill_no;
+    if (!faktur) return;
+    const body = (r.body1 || '') + (r.body2 || '');
+    const lines = body.split('|').filter(l => l.trim());
+    receiptByFaktur[faktur] = lines;
+  });
   const transByBill = {};
   DATA.trans.forEach(t => { const b = t.bill_no; if (!transByBill[b]) transByBill[b] = []; transByBill[b].push(t); });
   Object.keys(transByBill).forEach(billNo => {
     const lines = receiptByFaktur[billNo] || [];
     const trans = transByBill[billNo].sort((a,b) => (a.sort_no||0) - (b.sort_no||0));
-    const prodLines = lines.filter(l => { const m = l.match(/^(.+?)\s+(-?\d+(?:\.\d+)?)\s+([\d.,-]+)\s+([\d.,-]+)$/); if (!m) return false; return !/^(KP BRANDING|Tunai|Kembalian|Total|Disc\.|PPN|DONASI|===|---)/.test(m[1].trim()); });
+    const prodLines = lines.filter(l => {
+      const m = l.match(/^(.+?)\s+(-?\d+(?:\.\d+)?)\s+([\d.,-]+)\s+([\d.,-]+)$/);
+      if (!m) return false;
+      const name = m[1].trim();
+      return !/^(KP BRANDING|Tunai|Kembalian|Total|Disc\.|PPN|DONASI|===|---)/.test(name);
+    });
     trans.forEach((t, idx) => {
-      if (prodLines[idx]) { const m = prodLines[idx].match(/^(.+?)\s+(-?\d+(?:\.\d+)?)\s+([\d.,-]+)\s+([\d.,-]+)$/); if (m) { const plu = String(t.plu); if (!DATA.pluNames[plu]) DATA.pluNames[plu] = m[1].trim(); } }
+      if (prodLines[idx]) {
+        const m = prodLines[idx].match(/^(.+?)\s+(-?\d+(?:\.\d+)?)\s+([\d.,-]+)\s+([\d.,-]+)$/);
+        if (m) { const plu = String(t.plu); if (!DATA.pluNames[plu]) DATA.pluNames[plu] = m[1].trim(); }
+      }
     });
   });
 }
 
+/* ============================================================
+   CALCULATIONS (FIXED)
+   ============================================================ */
 // ✅ FIXED STATS WITH TOPOUP & FILTER
 function computeStats() {
-  const tx = FILTERED_TSALE;
-  const sales = tx.reduce((s,t) => s + (t.total_faktur||0), 0);
-  const memberTx = tx.filter(t => t.cust_id && t.cust_id !== '');
+  const date = document.getElementById('dateFilter').value;
+  const fakturs = getValidFakturs(date);
+  const todayTx = DATA.tsale.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no));
+  
+  const sales = todayTx.reduce((s,t) => s + (t.total_faktur||0), 0);
+  const memberTx = todayTx.filter(t => t.cust_id && t.cust_id !== '');
   const qtyMember = memberTx.length;
   const salesMember = memberTx.reduce((s,t) => s + (t.total_faktur||0), 0);
-  const totalCash = tx.reduce((s,t) => s + (t.cash||0), 0);
-  const totalChange = tx.reduce((s,t) => s + (t.change_pay||0), 0);
-  const totalTopup = tx.reduce((s,t) => s + (parseFloat(t.nom_topup)||0), 0);
-  const uangFisik = totalCash - totalChange + totalTopup; // ✅ RUMUS BENAR
-  const totalWallet = FILTERED_WALLET.reduce((s,w) => s + (w.amount||0), 0);
-  const totalCard = FILTERED_CARD.reduce((s,c) => s + (c.amount||0), 0);
-  const cashierIds = [...new Set(tx.map(t => t.user_id).filter(Boolean))];
-  const dates = [...new Set(tx.map(t => t.date_tx).filter(Boolean))];
+  
+  const totalCash = todayTx.reduce((s,t) => s + (t.cash||0), 0);
+  const totalChange = todayTx.reduce((s,t) => s + (t.change_pay||0), 0);
+  const totalTopup = todayTx.reduce((s,t) => s + (parseFloat(t.nom_topup)||0), 0);
+  
+  // ✅ RUMUS BENAR: Cash - Kembalian + Topup
+  const uangFisik = totalCash - totalChange + totalTopup;
+  
+  const totalWallet = DATA.wallet.filter(w => fakturs.has(w.faktur) || fakturs.has(w.bill_no)).reduce((s,w) => s + (w.amount||0), 0);
+  const totalCard = DATA.card.filter(c => fakturs.has(c.faktur) || fakturs.has(c.bill_no)).reduce((s,c) => s + (c.amount||0), 0);
+  
+  const cashierIds = [...new Set(todayTx.map(t => t.user_id).filter(Boolean))];
+  const dates = [...new Set(todayTx.map(t => t.date_tx).filter(Boolean))];
   const dataDate = dates.length ? dates[0] : '-';
-  return { sales, qtyMember, salesMember, uangFisik, totalCash, totalChange, totalTopup, totalWallet, totalCard, cashierIds, dataDate, totalTx: tx.length, totalItem: tx.reduce((s,t) => s + (t.qty_pcs||0), 0) };
+  
+  return { 
+    sales, 
+    qtyMember, 
+    salesMember, 
+    uangFisik, 
+    totalCash, 
+    totalChange, 
+    totalTopup, 
+    totalWallet, 
+    totalCard, 
+    cashierIds, 
+    dataDate, 
+    totalTx: todayTx.length, 
+    totalItem: todayTx.reduce((s,t) => s + (t.qty_pcs||0), 0) 
+  };
 }
 
+// ✅ FIXED PRODUCT COMPUTATION (DIRECT JOIN)
 function computeProducts() {
+  const date = document.getElementById('dateFilter').value;
+  const fakturs = getValidFakturs(date);
   const map = {};
-  FILTERED_TRANS.forEach(t => {
-    const plu = String(t.plu); if (!plu || plu === '0') return;
-    const qty = parseFloat(t.qty) || 0; if (qty <= 0) return;
+  
+  DATA.trans.forEach(t => {
+    // Filter berdasarkan faktur valid
+    if (!fakturs.has(t.faktur) && !fakturs.has(t.bill_no)) return;
+    
+    const plu = String(t.plu);
+    if (!plu || plu === '0') return;
+    const qty = parseFloat(t.qty) || 0;
+    if (qty <= 0) return;
     const price = parseFloat(t.price) || 0;
+    const subtotal = price * qty;
     if (!map[plu]) map[plu] = { plu, name: DATA.pluNames[plu] || `PLU ${plu}`, qty: 0, omzet: 0 };
-    map[plu].qty += qty; map[plu].omzet += price * qty;
+    map[plu].qty += qty;
+    map[plu].omzet += subtotal;
   });
   return Object.values(map).sort((a,b) => b.qty - a.qty);
 }
 
 function computeCashiers() {
+  const date = document.getElementById('dateFilter').value;
+  const fakturs = getValidFakturs(date);
   const map = {};
-  FILTERED_TSALE.forEach(t => { const uid = t.user_id; if (!uid) return; if (!map[uid]) map[uid] = { id: uid, tx: 0, omzet: 0, items: 0 }; map[uid].tx++; map[uid].omzet += t.total_faktur || 0; map[uid].items += t.qty_pcs || 0; });
+  DATA.tsale.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no)).forEach(t => {
+    const uid = t.user_id;
+    if (!uid) return;
+    if (!map[uid]) map[uid] = { id: uid, tx: 0, omzet: 0, items: 0 };
+    map[uid].tx++;
+    map[uid].omzet += t.total_faktur || 0;
+    map[uid].items += t.qty_pcs || 0;
+  });
+  DATA.login.forEach(l => {
+    if (map[l.user_id]) {
+      const ts = `${l.date_login} ${l.time_login}`;
+      if (!map[l.user_id].lastLogin || ts > map[l.user_id].lastLogin) map[l.user_id].lastLogin = ts;
+    }
+  });
   return Object.values(map).sort((a,b) => b.omzet - a.omzet);
 }
 
 function computeHourly() {
-  const hours = Array(24).fill(0), counts = Array(24).fill(0), memberHours = Array(24).fill(0);
-  FILTERED_TSALE.forEach(t => { const tm = parseTime(t.time_tx); if (tm) { hours[tm.h] += t.total_faktur || 0; counts[tm.h]++; if (t.cust_id && t.cust_id !== '') memberHours[tm.h]++; } });
+  const date = document.getElementById('dateFilter').value;
+  const fakturs = getValidFakturs(date);
+  const hours = Array(24).fill(0);
+  const counts = Array(24).fill(0);
+  const memberHours = Array(24).fill(0);
+  DATA.tsale.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no)).forEach(t => {
+    const tm = parseTime(t.time_tx);
+    if (tm) {
+      hours[tm.h] += t.total_faktur || 0;
+      counts[tm.h]++;
+      if (t.cust_id && t.cust_id !== '') memberHours[tm.h]++;
+    }
+  });
   return { hours, counts, memberHours };
 }
 
+/* ============================================================
+   PWP ANALYSIS LOGIC
+   ============================================================ */
 function isExcludedProduct(plu, name) {
-  const nameLower = (name || '').toLowerCase(); const pluStr = String(plu || '');
-  if (pluStr.startsWith('24') || pluStr.startsWith('25') || nameLower.includes('rokok') || nameLower.includes('sigaret') || nameLower.includes('marlboro') || nameLower.includes('djarum') || nameLower.includes('sampoerna') || nameLower.includes('mild')) return true;
-  if (nameLower.includes('minyak goreng') || nameLower.includes('minyakita') || nameLower.includes('bimoli') || nameLower.includes('sania') || nameLower.includes('fortune')) return true;
-  if (nameLower.includes('susu bayi') || nameLower.includes('infant formula') || nameLower.includes('step 1') || nameLower.includes('0-6') || nameLower.includes('0-12') || nameLower.includes('bayi')) return true;
+  const nameLower = (name || '').toLowerCase();
+  const pluStr = String(plu || '');
+  
+  // ROKOK
+  if (pluStr.startsWith('24') || pluStr.startsWith('25') || 
+      nameLower.includes('rokok') || nameLower.includes('sigaret') || 
+      nameLower.includes('cigarette') || nameLower.includes('marlboro') ||
+      nameLower.includes('djarum') || nameLower.includes('gudang garam') ||
+      nameLower.includes('surya') || nameLower.includes('sampoerna') ||
+      nameLower.includes('lucky strike') || nameLower.includes('dunhill') ||
+      nameLower.includes('mild') || nameLower.includes('filter')) {
+    return true;
+  }
+  
+  // MINYAK GORENG
+  if (nameLower.includes('minyak goreng') || nameLower.includes('minyakita') ||
+      nameLower.includes('bimoli') || nameLower.includes('sania') ||
+      nameLower.includes('fortune') || nameLower.includes('filma') ||
+      nameLower.includes('tropical') || nameLower.includes('sovy') ||
+      nameLower.includes('rose brand') || nameLower.includes('raja')) {
+    return true;
+  }
+  
+  // SUSU BAYI < 1 TAHUN
+  if (nameLower.includes('susu bayi') || nameLower.includes('infant formula') ||
+      nameLower.includes('formula 1') || nameLower.includes('step 1') ||
+      nameLower.includes('sgm') || nameLower.includes('dancow') ||
+      nameLower.includes('lactogen') || nameLower.includes('bebelac') ||
+      nameLower.includes('chil-go') || nameLower.includes('pediasure') ||
+      nameLower.includes('nan') || nameLower.includes('enfamil') ||
+      nameLower.includes('similac') || nameLower.includes('0-6') ||
+      nameLower.includes('0-12') || nameLower.includes('infant') ||
+      nameLower.includes('bayi') || nameLower.includes('prenagen') ||
+      nameLower.includes('morinaga') || nameLower.includes('s26')) {
+    if (nameLower.includes('0-6') || nameLower.includes('0-12') || 
+        nameLower.includes('infant') || nameLower.includes('bayi') ||
+        nameLower.includes('step 1') || nameLower.includes('formula 1')) {
+      return true;
+    }
+  }
+  
   return false;
 }
 
 function analyzePWP() {
-  const tier1 = [], tier2 = [], excludedTx = [];
-  FILTERED_TSALE.forEach(tx => {
-    const total = tx.total_faktur || 0;
-    if (total >= 20000 && total < 50000) tier1.push(tx);
+  const date = document.getElementById('dateFilter').value;
+  const fakturs = getValidFakturs(date);
+  const tx = DATA.tsale.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no));
+  
+  const tier1 = []; // 20K - <50K
+  const tier2 = []; // >=50K Eligible
+  const excludedTx = []; // >=50K Excluded
+  
+  tx.forEach(txItem => {
+    const total = txItem.total_faktur || 0;
+    
+    if (total >= 20000 && total < 50000) {
+      tier1.push(txItem);
+    }
+    
     if (total >= 50000) {
-      const items = FILTERED_TRANS.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur);
+      const items = DATA.trans.filter(t => (t.faktur === txItem.faktur || t.bill_no === txItem.faktur || t.faktur === txItem.bill_no || t.bill_no === txItem.bill_no));
       let hasExcluded = items.some(item => isExcludedProduct(item.plu, DATA.pluNames[item.plu] || ''));
-      if (!hasExcluded) tier2.push(tx); else excludedTx.push(tx);
+      
+      if (!hasExcluded) {
+        tier2.push(txItem);
+      } else {
+        excludedTx.push(txItem);
+      }
     }
   });
+  
   return { tier1, tier2, excludedTx };
 }
 
+/* ============================================================
+   RENDER
+   ============================================================ */
 function renderAll() {
   const stats = computeStats();
-  renderDashboard(stats); renderTransactions(); renderProducts(); renderCashiers(); renderPayments(stats); renderMonitoring(); renderApiLog(); renderReport(stats); renderSettings(); renderPWPAnalysis();
+  renderDashboard(stats);
+  renderTransactions();
+  renderProducts();
+  renderCashiers();
+  renderPayments(stats);
+  renderMonitoring();
+  renderApiLog();
+  renderReport(stats);
+  renderSettings();
+  renderPWPAnalysis();
   document.getElementById('storeLabel').textContent = `${DATA.storeId} • ${DATA.storeName}`;
 }
 
@@ -751,154 +1453,467 @@ function renderDashboard(s) {
   document.getElementById('kpiSales').textContent = fmtRp(s.sales);
   document.getElementById('kpiSalesSub').textContent = `${s.totalTx} transaksi • ${s.totalItem} item`;
   document.getElementById('kpiQtyMember').textContent = fmtNum(s.qtyMember);
-  document.getElementById('kpiQtyMemberSub').textContent = `${s.totalTx > 0 ? Math.round((s.qtyMember/s.totalTx)*100) : 0}% dari total`;
+  const memberPercent = s.totalTx > 0 ? Math.round((s.qtyMember/s.totalTx)*100) : 0;
+  document.getElementById('kpiQtyMemberSub').textContent = `${memberPercent}% dari total transaksi`;
   document.getElementById('kpiSalesMember').textContent = fmtRp(s.salesMember);
-  document.getElementById('kpiSalesMemberSub').textContent = `${s.sales > 0 ? Math.round((s.salesMember/s.sales)*100) : 0}% dari sales`;
+  const salesMemberPercent = s.sales > 0 ? Math.round((s.salesMember/s.sales)*100) : 0;
+  document.getElementById('kpiSalesMemberSub').textContent = `${salesMemberPercent}% dari total sales`;
   document.getElementById('kpiUangFisik').textContent = fmtRp(s.uangFisik);
   document.getElementById('kpiUangFisikSub').textContent = `Cash ${fmtRp(s.totalCash)} - Kembalian ${fmtRp(s.totalChange)} + Topup ${fmtRp(s.totalTopup)}`;
   
   const products = computeProducts().slice(0, 10);
-  document.getElementById('topProductsBody').innerHTML = products.map((p,i) => `<tr><td><span class="rank-badge ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other'}">${i+1}</span></td><td><div style="font-weight:500">${escHtml(p.name)}</div><div class="text-xs" style="color:var(--text-muted)">PLU: ${p.plu}</div></td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td></tr>`).join('');
+  document.getElementById('topProductsBody').innerHTML = products.map((p,i) => {
+    const rank = i + 1;
+    const rankBg = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+    const medal = rank === 1 ? '🥇' : rank === 2 ? '' : rank === 3 ? '' : '';
+    return `<tr><td><span class="rank-badge ${rankBg}">${medal || rank}</span></td><td><div style="font-weight:500">${escHtml(p.name)}</div><div class="text-xs" style="color:var(--text-muted)">PLU: ${p.plu}</div></td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td></tr>`;
+  }).join('');
   
-  const recent = [...FILTERED_TSALE].sort((a,b) => { const ta = parseTime(a.time_tx), tb = parseTime(b.time_tx); if (!ta || !tb) return 0; return (tb.h*3600+tb.m*60+tb.s) - (ta.h*3600+ta.m*60+ta.s); }).slice(0, 8);
+  const fakturs = getValidFakturs(document.getElementById('dateFilter').value);
+  const recent = DATA.tsale.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no)).sort((a,b) => { const ta = parseTime(a.time_tx), tb = parseTime(b.time_tx); if (!ta || !tb) return 0; return (tb.h*3600+tb.m*60+tb.s) - (ta.h*3600+ta.m*60+ta.s); }).slice(0, 8);
   document.getElementById('recentTxBody').innerHTML = recent.map(t => `<tr onclick="showTxDetail('${escHtml(t.faktur)}')" class="clickable"><td class="mono" style="font-weight:600">${escHtml(t.faktur)}</td><td>${escHtml(t.time_tx||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(t.total_faktur)}</td></tr>`).join('');
   renderCharts(s);
 }
 
 function renderCharts(s) {
-  const hourly = computeHourly(); const labels = Array.from({length:24}, (_,i) => String(i).padStart(2,'0')+':00');
+  const hourly = computeHourly();
+  const labels = Array.from({length:24}, (_,i) => String(i).padStart(2,'0')+':00');
   const isDark = document.body.getAttribute('data-theme') === 'dark';
-  const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)'; const textColor = isDark ? '#9ca3af' : '#475569';
+  const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)';
+  const textColor = isDark ? '#9ca3af' : '#475569';
   if (charts.salesHourly) charts.salesHourly.destroy();
-  charts.salesHourly = new Chart(document.getElementById('chartSalesHourly').getContext('2d'), { type: 'bar', data: { labels, datasets: [{ data: hourly.hours, backgroundColor: 'rgba(16,185,129,0.6)', borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: gridColor } }, x: { ticks: { color: textColor, maxRotation: 0, autoSkip: true }, grid: { display: false } } } } });
+  charts.salesHourly = new Chart(document.getElementById('chartSalesHourly').getContext('2d'), { type: 'bar', data: { labels, datasets: [{ label: 'Sales', data: hourly.hours, backgroundColor: 'rgba(16,185,129,0.6)', borderColor: 'rgba(16,185,129,1)', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: gridColor } }, x: { ticks: { color: textColor, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } } } } });
   if (charts.memberHourly) charts.memberHourly.destroy();
-  charts.memberHourly = new Chart(document.getElementById('chartMemberHourly').getContext('2d'), { type: 'line', data: { labels, datasets: [{ data: hourly.memberHours, backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor, maxRotation: 0, autoSkip: true }, grid: { display: false } } } } });
+  charts.memberHourly = new Chart(document.getElementById('chartMemberHourly').getContext('2d'), { type: 'line', data: { labels, datasets: [{ label: 'Member', data: hourly.memberHours, backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', borderWidth: 2, fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } } } } });
   if (charts.payment) charts.payment.destroy();
-  charts.payment = new Chart(document.getElementById('chartPayment').getContext('2d'), { type: 'doughnut', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: isDark ? '#e5e7eb' : '#0f172a' } } } } });
+  charts.payment = new Chart(document.getElementById('chartPayment').getContext('2d'), { type: 'doughnut', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: isDark ? '#e5e7eb' : '#0f172a', padding: 12 } } } } });
   const products = computeProducts().slice(0, 10);
   if (charts.topProducts) charts.topProducts.destroy();
-  charts.topProducts = new Chart(document.getElementById('chartTopProducts').getContext('2d'), { type: 'bar', data: { labels: products.map(p => p.name.length > 20 ? p.name.substring(0,20)+'...' : p.name), datasets: [{ data: products.map(p => p.qty), backgroundColor: 'rgba(245,158,11,0.6)', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } } } } });
+  charts.topProducts = new Chart(document.getElementById('chartTopProducts').getContext('2d'), { type: 'bar', data: { labels: products.map(p => p.name.length > 20 ? p.name.substring(0,20)+'...' : p.name), datasets: [{ label: 'Qty', data: products.map(p => p.qty), backgroundColor: 'rgba(245,158,11,0.6)', borderColor: 'rgba(245,158,11,1)', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } } } } });
 }
 
 function renderTransactions() {
+  const date = document.getElementById('dateFilter').value;
+  const fakturs = getValidFakturs(date);
   const tbody = document.getElementById('txTableBody');
-  const rows = [...FILTERED_TSALE].sort((a,b) => { const ta = parseTime(a.time_tx), tb = parseTime(b.time_tx); if (!ta || !tb) return 0; return (tb.h*3600+tb.m*60+tb.s) - (ta.h*3600+ta.m*60+ta.s); });
+  const rows = DATA.tsale.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no)).sort((a,b) => { const ta = parseTime(a.time_tx), tb = parseTime(b.time_tx); if (!ta || !tb) return 0; return (tb.h*3600+tb.m*60+tb.s) - (ta.h*3600+ta.m*60+ta.s); });
   tbody.innerHTML = rows.map(t => {
-    const wallet = FILTERED_WALLET.find(w => w.faktur === t.faktur); const card = FILTERED_CARD.find(c => c.faktur === t.faktur);
-    let method = '<span class="badge-soft badge-green">Cash</span>'; if (wallet) method = '<span class="badge-soft badge-cyan">Wallet</span>'; if (card) method = '<span class="badge-soft badge-purple">Kartu</span>';
-    return `<tr onclick="showTxDetail('${escHtml(t.faktur)}')" class="clickable"><td class="mono" style="font-weight:600">${escHtml(t.faktur)}</td><td>${escHtml(t.time_tx||'-')}</td><td><span class="badge-soft badge-gray">${escHtml(t.user_id)}</span></td><td>${fmtNum(t.qty_pcs||0)} item</td><td style="text-align:right" class="text-money">${fmtRp(t.total_faktur)}</td><td style="text-align:right" class="text-money">${fmtRp(t.cash||0)}</td><td style="text-align:right" class="text-money">${fmtRp(t.change_pay||0)}</td><td>${method}</td><td style="text-align:center"><button class="btn-custom btn-sm" onclick="event.stopPropagation();showReceipt('${escHtml(t.faktur)}')"><i class="bi bi-receipt"></i></button></td></tr>`;
+    const cash = t.cash || 0; const change = t.change_pay || 0;
+    const wallet = DATA.wallet.find(w => w.faktur === t.faktur || w.bill_no === t.faktur);
+    const card = DATA.card.find(c => c.faktur === t.faktur || c.bill_no === t.faktur);
+    let method = '<span class="badge-soft badge-green">Cash</span>';
+    if (wallet) method = '<span class="badge-soft badge-cyan">Wallet</span>';
+    if (card) method = '<span class="badge-soft badge-purple">Kartu</span>';
+    return `<tr onclick="showTxDetail('${escHtml(t.faktur)}')" class="clickable"><td class="mono" style="font-weight:600">${escHtml(t.faktur)}</td><td>${escHtml(t.time_tx||'-')}</td><td><span class="badge-soft badge-gray"><i class="bi bi-person-fill"></i> ${escHtml(t.user_id)}</span></td><td>${fmtNum(t.qty_pcs||0)} item</td><td style="text-align:right" class="text-money">${fmtRp(t.total_faktur)}</td><td style="text-align:right" class="text-money">${fmtRp(cash)}</td><td style="text-align:right" class="text-money">${fmtRp(change)}</td><td>${method}</td><td style="text-align:center"><button class="btn-custom btn-sm" onclick="event.stopPropagation();showReceipt('${escHtml(t.faktur)}')"><i class="bi bi-receipt"></i></button></td></tr>`;
   }).join('');
   document.getElementById('txSearch').oninput = e => { const q = e.target.value.toLowerCase(); tbody.querySelectorAll('tr').forEach(tr => { tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'; }); };
 }
 
 function renderProducts() {
   const products = computeProducts();
-  document.getElementById('prodUnique').textContent = fmtNum(products.length); document.getElementById('prodQty').textContent = fmtNum(products.reduce((s,p) => s + p.qty, 0)); document.getElementById('prodOmzet').textContent = fmtRp(products.reduce((s,p) => s + p.omzet, 0)); document.getElementById('prodAvg').textContent = fmtRp(products.length ? products.reduce((s,p) => s + p.omzet, 0)/products.length : 0);
-  const render = (list) => { document.getElementById('prodTableBody').innerHTML = list.slice(0, 100).map((p,i) => `<tr><td><span class="rank-badge ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other'}">${i+1}</span></td><td class="mono" style="font-size:12px">${p.plu}</td><td style="font-weight:500">${escHtml(p.name)}</td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td><td style="text-align:right" class="text-money">${fmtRp(p.qty ? p.omzet/p.qty : 0)}</td></tr>`).join(''); };
-  render(products); document.getElementById('prodSearch').oninput = e => { const q = e.target.value.toLowerCase(); render(products.filter(p => p.name.toLowerCase().includes(q) || p.plu.includes(q))); };
+  const unique = products.length;
+  const totalQty = products.reduce((s,p) => s + p.qty, 0);
+  const totalOmzet = products.reduce((s,p) => s + p.omzet, 0);
+  document.getElementById('prodUnique').textContent = fmtNum(unique);
+  document.getElementById('prodQty').textContent = fmtNum(totalQty);
+  document.getElementById('prodOmzet').textContent = fmtRp(totalOmzet);
+  document.getElementById('prodAvg').textContent = fmtRp(unique ? totalOmzet/unique : 0);
+  const render = (list) => { document.getElementById('prodTableBody').innerHTML = list.slice(0, 100).map((p,i) => { const rank = i + 1; const rankBg = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other'; return `<tr><td><span class="rank-badge ${rankBg}">${rank}</span></td><td class="mono" style="font-size:12px">${p.plu}</td><td style="font-weight:500">${escHtml(p.name)}</td><td style="text-align:right"><span class="badge-soft badge-blue">${fmtNum(p.qty)} pcs</span></td><td style="text-align:right" class="text-money">${fmtRp(p.omzet)}</td><td style="text-align:right" class="text-money">${fmtRp(p.qty ? p.omzet/p.qty : 0)}</td></tr>`; }).join(''); };
+  render(products);
+  document.getElementById('prodSearch').oninput = e => { const q = e.target.value.toLowerCase(); render(products.filter(p => p.name.toLowerCase().includes(q) || p.plu.includes(q))); };
 }
 
-function renderCashiers() { document.getElementById('cashierGrid').innerHTML = computeCashiers().map(c => `<div class="col-md-6 col-xl-4"><div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px"><div style="display:flex;gap:12px;align-items:center"><div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px">${String(c.id).slice(-2)}</div><div><div style="font-weight:700;font-size:15px">Kasir ${escHtml(c.id)}</div></div></div></div><div class="row g-2"><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Transaksi</div><div style="font-weight:700;font-size:16px">${fmtNum(c.tx)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Item</div><div style="font-weight:700;font-size:16px">${fmtNum(c.items)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Omzet</div><div style="font-weight:700;font-size:13px" class="text-money">${fmtRp(c.omzet)}</div></div></div></div></div></div>`).join(''); }
+function renderCashiers() {
+  const cashiers = computeCashiers();
+  document.getElementById('cashierGrid').innerHTML = cashiers.map(c => {
+    const lastLogin = c.lastLogin || '-';
+    return `<div class="col-md-6 col-xl-4"><div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px"><div style="display:flex;gap:12px;align-items:center"><div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px">${String(c.id).slice(-2)}</div><div><div style="font-weight:700;font-size:15px">Kasir ${escHtml(c.id)}</div><small style="color:var(--text-muted)">Login: ${escHtml(lastLogin)}</small></div></div><span class="badge-soft badge-green"><span class="live-dot"></span> Aktif</span></div><div class="row g-2"><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Transaksi</div><div style="font-weight:700;font-size:16px">${fmtNum(c.tx)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Item</div><div style="font-weight:700;font-size:16px">${fmtNum(c.items)}</div></div></div><div class="col-4"><div style="background:var(--bg-secondary);padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--text-muted)">Omzet</div><div style="font-weight:700;font-size:13px" class="text-money">${fmtRp(c.omzet)}</div></div></div></div></div></div>`;
+  }).join('');
+}
 
 function renderPayments(s) {
-  document.getElementById('payCash').textContent = fmtRp(s.totalCash); document.getElementById('payWallet').textContent = fmtRp(s.totalWallet); document.getElementById('payCard').textContent = fmtRp(s.totalCard);
-  const isDark = document.body.getAttribute('data-theme') === 'dark'; const textColor = isDark ? '#e5e7eb' : '#0f172a';
-  if (charts.payDist) charts.payDist.destroy(); charts.payDist = new Chart(document.getElementById('chartPayDist').getContext('2d'), { type: 'pie', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } } });
-  if (charts.payBar) charts.payBar.destroy(); charts.payBar = new Chart(document.getElementById('chartPayBar').getContext('2d'), { type: 'bar', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'], borderRadius: 6 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' } }, y: { ticks: { color: textColor } } } } });
-  document.getElementById('walletTableBody').innerHTML = FILTERED_WALLET.slice(0, 50).map(w => `<tr><td class="mono">${escHtml(w.faktur)}</td><td class="mono" style="font-size:12px">${escHtml(w.wallet_id||'-')}</td><td>${escHtml(w.customer_id||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(w.amount)}</td><td><span class="badge-soft ${w.status==='S'?'badge-green':'badge-red'}">${escHtml(w.status||'-')}</span></td><td>${escHtml(w.date_tx||'-')}</td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Tidak ada transaksi wallet</td></tr>';
+  document.getElementById('payCash').textContent = fmtRp(s.totalCash);
+  document.getElementById('payWallet').textContent = fmtRp(s.totalWallet);
+  document.getElementById('payCard').textContent = fmtRp(s.totalCard);
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#e5e7eb' : '#0f172a';
+  if (charts.payDist) charts.payDist.destroy();
+  charts.payDist = new Chart(document.getElementById('chartPayDist').getContext('2d'), { type: 'pie', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'], borderWidth: 2, borderColor: isDark ? '#1a2234' : '#ffffff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } } });
+  if (charts.payBar) charts.payBar.destroy();
+  charts.payBar = new Chart(document.getElementById('chartPayBar').getContext('2d'), { type: 'bar', data: { labels: ['Cash', 'Wallet', 'Kartu'], datasets: [{ label: 'Nominal', data: [s.totalCash, s.totalWallet, s.totalCard], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6'], borderRadius: 6 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)' } }, y: { ticks: { color: textColor }, grid: { display: false } } } } });
+  
+  const date = document.getElementById('dateFilter').value;
+  const fakturs = getValidFakturs(date);
+  document.getElementById('walletTableBody').innerHTML = DATA.wallet.filter(w => fakturs.has(w.faktur) || fakturs.has(w.bill_no)).slice(0, 50).map(w => `<tr><td class="mono">${escHtml(w.faktur)}</td><td class="mono" style="font-size:12px">${escHtml(w.wallet_id||'-')}</td><td>${escHtml(w.customer_id||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(w.amount)}</td><td><span class="badge-soft ${w.status==='S'?'badge-green':'badge-red'}">${escHtml(w.status||'-')}</span></td><td>${escHtml(w.date_tx||'-')} ${escHtml(w.create_date||'')}</td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Tidak ada transaksi wallet</td></tr>';
 }
 
 function renderMonitoring() {
-  const synced = DATA.sync.filter(s => s.status === 'S').length; const failed = DATA.sync.filter(s => s.status === 'F').length;
-  document.getElementById('monSynced').textContent = fmtNum(synced); document.getElementById('monFailed').textContent = fmtNum(failed); document.getElementById('monPending').textContent = fmtNum(DATA.sync.length - synced - failed);
-  document.getElementById('syncTableBody').innerHTML = DATA.sync.slice(0, 100).map(s => `<tr><td class="mono">${escHtml(s.faktur)}</td><td><span class="badge-soft ${s.status==='S'?'badge-green':s.status==='F'?'badge-red':'badge-orange'}">${escHtml(s.status||'-')}</span></td><td>${escHtml(s.date_sync||'-')}</td><td>${escHtml(s.time_sync||'-')}</td><td style="font-size:11px;color:var(--text-muted);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.response||'-')}</td></tr>`).join('');
+  const synced = DATA.sync.filter(s => s.status === 'S').length;
+  const failed = DATA.sync.filter(s => s.status === 'F').length;
+  const pending = DATA.sync.length - synced - failed;
+  document.getElementById('monSynced').textContent = fmtNum(synced);
+  document.getElementById('monFailed').textContent = fmtNum(failed);
+  document.getElementById('monPending').textContent = fmtNum(pending);
+  document.getElementById('syncTableBody').innerHTML = DATA.sync.slice(0, 100).map(s => {
+    const status = s.status;
+    let badge = 'badge-gray';
+    if (status === 'S') badge = 'badge-green';
+    else if (status === 'F') badge = 'badge-red';
+    else if (status === 'P') badge = 'badge-orange';
+    return `<tr><td class="mono">${escHtml(s.faktur)}</td><td><span class="badge-soft ${badge}">${escHtml(status||'-')}</span></td><td>${escHtml(s.date_sync||'-')}</td><td>${escHtml(s.time_sync||'-')}</td><td style="font-size:11px;color:var(--text-muted);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.response||'-')}</td></tr>`;
+  }).join('');
 }
 
 function renderApiLog() {
-  const modules = [...new Set(DATA.connection.map(c => c.module).filter(Boolean))]; const sel = document.getElementById('apiModuleFilter');
-  sel.innerHTML = '<option value="">Semua Module</option>' + modules.map(m => `<option value="${escHtml(m)}">${escHtml(m)}</option>`).join('');
-  const render = (filter) => { const list = filter ? DATA.connection.filter(c => c.module === filter) : DATA.connection; document.getElementById('apiTableBody').innerHTML = list.slice(0, 100).map((c,i) => `<tr><td style="font-size:12px">${escHtml(c.date_time||'-')}</td><td><span class="badge-soft badge-blue">${escHtml(c.module||'-')}</span></td><td>${escHtml(c.process||'-')}</td><td class="mono" style="font-size:12px">${escHtml(c.faktur_tx||'-')}</td><td><span class="badge-soft ${c.status==='TRUE'?'badge-green':'badge-red'}">${escHtml(c.status||'-')}</span></td><td style="text-align:center"><button class="btn-custom btn-sm" onclick="showApiDetail(${i})"><i class="bi bi-eye"></i></button></td></tr>`).join(''); };
-  render(); sel.onchange = e => render(e.target.value);
+  const modules = [...new Set(DATA.connection.map(c => c.module).filter(Boolean))];
+  const sel = document.getElementById('apiModuleFilter');
+  sel.innerHTML = '<option value="">Semua Module ('+DATA.connection.length+')</option>' + modules.map(m => `<option value="${escHtml(m)}">${escHtml(m)}</option>`).join('');
+  const render = (filter) => {
+    const list = filter ? DATA.connection.filter(c => c.module === filter) : DATA.connection;
+    document.getElementById('apiTableBody').innerHTML = list.slice(0, 100).map((c,i) => {
+      const status = c.status;
+      const badge = status === 'TRUE' ? 'badge-green' : 'badge-red';
+      return `<tr><td style="font-size:12px">${escHtml(c.date_time||'-')}</td><td><span class="badge-soft badge-blue">${escHtml(c.module||'-')}</span></td><td>${escHtml(c.process||'-')}</td><td class="mono" style="font-size:12px">${escHtml(c.faktur_tx||'-')}</td><td><span class="badge-soft ${badge}">${escHtml(status||'-')}</span></td><td style="text-align:center"><button class="btn-custom btn-sm" onclick="showApiDetail(${i},'${escHtml(c.module)}')"><i class="bi bi-eye"></i></button></td></tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Tidak ada log</td></tr>';
+  };
+  render();
+  sel.onchange = e => render(e.target.value);
 }
 
 function renderReport(s) {
-  const hourly = computeHourly(); const labels = Array.from({length:24}, (_,i) => String(i).padStart(2,'0')+':00');
-  const isDark = document.body.getAttribute('data-theme') === 'dark'; const textColor = isDark ? '#9ca3af' : '#475569'; const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)';
-  if (charts.reportSales) charts.reportSales.destroy(); charts.reportSales = new Chart(document.getElementById('chartReportSales').getContext('2d'), { type: 'bar', data: { labels, datasets: [{ data: hourly.hours, backgroundColor: 'rgba(16,185,129,0.6)', borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } } });
-  if (charts.reportMember) charts.reportMember.destroy(); charts.reportMember = new Chart(document.getElementById('chartReportMember').getContext('2d'), { type: 'line', data: { labels, datasets: [{ data: hourly.memberHours, backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } } });
-  const products = computeProducts(); const cashiers = computeCashiers();
-  document.getElementById('reportSummary').innerHTML = `<div class="row g-3"><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Transaksi</h6><table class="table" style="color:var(--text-primary)"><tr><td>Total Transaksi</td><td style="text-align:right;font-weight:700">${fmtNum(s.totalTx)}</td></tr><tr><td>Total Item</td><td style="text-align:right;font-weight:700">${fmtNum(s.totalItem)}</td></tr><tr><td>Rata-rata per Transaksi</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalTx ? s.sales/s.totalTx : 0)}</td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Pembayaran</h6><table class="table" style="color:var(--text-primary)"><tr><td>Cash</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalCash)}</td></tr><tr><td>Wallet</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalWallet)}</td></tr><tr><td>Kartu</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalCard)}</td></tr><tr><td>Kembalian</td><td style="text-align:right;font-weight:700;color:var(--accent-orange)">${fmtRp(s.totalChange)}</td></tr><tr><td>Topup Flazz</td><td style="text-align:right;font-weight:700;color:var(--accent-cyan)">${fmtRp(s.totalTopup)}</td></tr><tr><td><strong>Uang Fisik Total</strong></td><td style="text-align:right;font-weight:700;color:var(--accent-green)"><strong>${fmtRp(s.uangFisik)}</strong></td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Produk & Kasir</h6><table class="table" style="color:var(--text-primary)"><tr><td>Produk Unik</td><td style="text-align:right;font-weight:700">${fmtNum(products.length)}</td></tr><tr><td>Kasir Aktif</td><td style="text-align:right;font-weight:700">${fmtNum(cashiers.length)}</td></tr></table></div></div>`;
+  const hourly = computeHourly();
+  const labels = Array.from({length:24}, (_,i) => String(i).padStart(2,'0')+':00');
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)';
+  const textColor = isDark ? '#9ca3af' : '#475569';
+  if (charts.reportSales) charts.reportSales.destroy();
+  charts.reportSales = new Chart(document.getElementById('chartReportSales').getContext('2d'), { type: 'bar', data: { labels, datasets: [{ label: 'Sales', data: hourly.hours, backgroundColor: 'rgba(16,185,129,0.6)', borderColor: 'rgba(16,185,129,1)', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } } });
+  if (charts.reportMember) charts.reportMember.destroy();
+  charts.reportMember = new Chart(document.getElementById('chartReportMember').getContext('2d'), { type: 'line', data: { labels, datasets: [{ label: 'Member', data: hourly.memberHours, backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', borderWidth: 2, fill: true, tension: 0.4 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } } });
+  const products = computeProducts();
+  const cashiers = computeCashiers();
+  document.getElementById('reportSummary').innerHTML = `<div class="row g-3"><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Transaksi</h6><table class="table" style="color:var(--text-primary)"><tr><td>Total Transaksi</td><td style="text-align:right;font-weight:700">${fmtNum(s.totalTx)}</td></tr><tr><td>Total Item</td><td style="text-align:right;font-weight:700">${fmtNum(s.totalItem)}</td></tr><tr><td>Rata-rata per Transaksi</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalTx ? s.sales/s.totalTx : 0)}</td></tr><tr><td>Rata-rata per Item</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalItem ? s.sales/s.totalItem : 0)}</td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Member</h6><table class="table" style="color:var(--text-primary)"><tr><td>Transaksi Member</td><td style="text-align:right;font-weight:700">${fmtNum(s.qtyMember)}</td></tr><tr><td>Sales Member</td><td style="text-align:right;font-weight:700">${fmtRp(s.salesMember)}</td></tr><tr><td>Persentase Member</td><td style="text-align:right;font-weight:700">${s.totalTx > 0 ? Math.round((s.qtyMember/s.totalTx)*100) : 0}%</td></tr><tr><td>Rata-rata per Member</td><td style="text-align:right;font-weight:700">${fmtRp(s.qtyMember ? s.salesMember/s.qtyMember : 0)}</td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Pembayaran</h6><table class="table" style="color:var(--text-primary)"><tr><td>Cash</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalCash)}</td></tr><tr><td>Wallet</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalWallet)}</td></tr><tr><td>Kartu</td><td style="text-align:right;font-weight:700">${fmtRp(s.totalCard)}</td></tr><tr><td>Kembalian</td><td style="text-align:right;font-weight:700;color:var(--accent-orange)">${fmtRp(s.totalChange)}</td></tr><tr><td>Topup Flazz</td><td style="text-align:right;font-weight:700;color:var(--accent-cyan)">${fmtRp(s.totalTopup)}</td></tr><tr><td><strong>Uang Fisik Total</strong></td><td style="text-align:right;font-weight:700;color:var(--accent-green)"><strong>${fmtRp(s.uangFisik)}</strong></td></tr></table></div><div class="col-md-6"><h6 style="font-weight:700">Ringkasan Produk & Kasir</h6><table class="table" style="color:var(--text-primary)"><tr><td>Produk Unik</td><td style="text-align:right;font-weight:700">${fmtNum(products.length)}</td></tr><tr><td>Total Qty Terjual</td><td style="text-align:right;font-weight:700">${fmtNum(products.reduce((s,p)=>s+p.qty,0))}</td></tr><tr><td>Kasir Aktif</td><td style="text-align:right;font-weight:700">${fmtNum(cashiers.length)}</td></tr><tr><td>Uang Fisik Transaksi</td><td style="text-align:right;font-weight:700;color:var(--accent-orange)">${fmtRp(s.uangFisik)}</td></tr></table></div></div>`;
 }
 
 function renderSettings() {
   const stats = computeStats();
-  document.getElementById('dbInfoContent').innerHTML = `<table class="table" style="color:var(--text-primary)"><tr><td>Store ID</td><td style="text-align:right;font-weight:700">${DATA.storeId}</td></tr><tr><td>Nama Toko</td><td style="text-align:right;font-weight:700">${DATA.storeName}</td></tr><tr><td>Total Transaksi (Filtered)</td><td style="text-align:right;font-weight:700">${fmtNum(stats.totalTx)}</td></tr></table>`;
+  document.getElementById('dbInfoContent').innerHTML = `<table class="table" style="color:var(--text-primary)"><tr><td>Store ID</td><td style="text-align:right;font-weight:700">${DATA.storeId}</td></tr><tr><td>Nama Toko</td><td style="text-align:right;font-weight:700">${DATA.storeName}</td></tr><tr><td>Tanggal Data</td><td style="text-align:right;font-weight:700">${fmtDateTime(stats.dataDate)}</td></tr><tr><td>Total Transaksi</td><td style="text-align:right;font-weight:700">${fmtNum(stats.totalTx)}</td></tr><tr><td>Total Item</td><td style="text-align:right;font-weight:700">${fmtNum(stats.totalItem)}</td></tr><tr><td>Kasir Aktif</td><td style="text-align:right;font-weight:700">${fmtNum(stats.cashierIds.length)}</td></tr><tr><td>Member Unik</td><td style="text-align:right;font-weight:700">${fmtNum(stats.qtyMember)}</td></tr></table>`;
   const isDark = document.body.getAttribute('data-theme') === 'dark';
-  document.getElementById('darkToggle').classList.toggle('active', isDark); document.getElementById('lightToggle').classList.toggle('active', !isDark); document.getElementById('themeToggle').classList.toggle('active', isDark);
+  document.getElementById('darkToggle').classList.toggle('active', isDark);
+  document.getElementById('lightToggle').classList.toggle('active', !isDark);
+  document.getElementById('themeToggle').classList.toggle('active', isDark);
 }
 
 function renderPWPAnalysis() {
   const { tier1, tier2, excludedTx } = analyzePWP();
-  const totalTx = FILTERED_TSALE.length;
-  const totalSales = FILTERED_TSALE.reduce((s,t) => s + (t.total_faktur||0), 0);
-  const avgPurchase = totalTx > 0 ? totalSales / totalTx : 0;
+  const totalTx = tier1.length + tier2.length + excludedTx.length + DATA.tsale.filter(t => (t.total_faktur||0) < 20000 && (document.getElementById('dateFilter').value ? t.date_tx === document.getElementById('dateFilter').value : true)).length;
+  const actualFilteredTx = DATA.tsale.filter(t => (document.getElementById('dateFilter').value ? t.date_tx === document.getElementById('dateFilter').value : true)).length;
+  const totalSales = DATA.tsale.filter(t => (document.getElementById('dateFilter').value ? t.date_tx === document.getElementById('dateFilter').value : true)).reduce((s,t) => s + (t.total_faktur||0), 0);
+  const avgPurchase = actualFilteredTx > 0 ? totalSales / actualFilteredTx : 0;
+  
   const tier1Total = tier1.reduce((s,t) => s + (t.total_faktur||0), 0);
   const tier2Total = tier2.reduce((s,t) => s + (t.total_faktur||0), 0);
   
   document.getElementById('pwpTier1Count').textContent = tier1.length.toLocaleString('id-ID');
-  document.getElementById('pwpTier1Percent').textContent = totalTx > 0 ? ((tier1.length / totalTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
+  document.getElementById('pwpTier1Percent').textContent = 
+    actualFilteredTx > 0 ? ((tier1.length / actualFilteredTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
+  
   document.getElementById('pwpTier2Count').textContent = tier2.length.toLocaleString('id-ID');
-  document.getElementById('pwpTier2Percent').textContent = totalTx > 0 ? ((tier2.length / totalTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
+  document.getElementById('pwpTier2Percent').textContent = 
+    actualFilteredTx > 0 ? ((tier2.length / actualFilteredTx) * 100).toFixed(1) + '% dari total' : '0% dari total';
+  
   document.getElementById('pwpAvgPurchase').textContent = fmtRp(avgPurchase);
-  document.getElementById('pwpTotalTx').textContent = totalTx.toLocaleString('id-ID');
+  document.getElementById('pwpAvgSub').textContent = 'Per transaksi';
+  document.getElementById('pwpTotalTx').textContent = actualFilteredTx.toLocaleString('id-ID');
   
-  document.getElementById('pwpTier1Body').innerHTML = tier1.slice(0, 50).map(tx => { const items = FILTERED_TRANS.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur); return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')"><td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td><td>${escHtml(tx.time_tx||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td><td><span class="badge-soft badge-blue">${items.length} items</span></td></tr>`; }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
-  document.getElementById('pwpTier2Body').innerHTML = tier2.slice(0, 50).map(tx => { const items = FILTERED_TRANS.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur); return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')"><td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td><td>${escHtml(tx.time_tx||'-')}</td><td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td><td><span class="badge-soft badge-purple">${items.length} items</span></td></tr>`; }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
+  document.getElementById('pwpTier1Body').innerHTML = tier1.slice(0, 50).map(tx => {
+    const items = DATA.trans.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur || t.faktur === tx.bill_no || t.bill_no === tx.bill_no);
+    return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')">
+      <td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td>
+      <td>${escHtml(tx.time_tx||'-')}</td>
+      <td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td>
+      <td><span class="badge-soft badge-blue">${items.length} items</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
   
-  const isDark = document.body.getAttribute('data-theme') === 'dark'; const textColor = isDark ? '#9ca3af' : '#475569';
+  document.getElementById('pwpTier2Body').innerHTML = tier2.slice(0, 50).map(tx => {
+    const items = DATA.trans.filter(t => t.faktur === tx.faktur || t.bill_no === tx.faktur || t.faktur === tx.bill_no || t.bill_no === tx.bill_no);
+    return `<tr class="clickable" onclick="showTxDetail('${escHtml(tx.faktur)}')">
+      <td class="mono" style="font-size:12px">${escHtml(tx.faktur)}</td>
+      <td>${escHtml(tx.time_tx||'-')}</td>
+      <td style="text-align:right" class="text-money">${fmtRp(tx.total_faktur)}</td>
+      <td><span class="badge-soft badge-purple">${items.length} items</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Tidak ada transaksi</td></tr>';
+  
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#9ca3af' : '#475569';
+  const gridColor = isDark ? 'rgba(42,53,80,0.5)' : 'rgba(226,232,240,0.5)';
+  
+  // Pie Chart: Distribusi Tier
   if (charts.pwpTier) charts.pwpTier.destroy();
-  charts.pwpTier = new Chart(document.getElementById('chartPwpTier').getContext('2d'), { type: 'doughnut', data: { labels: ['20K - <50K', '≥50K (Eligible)', '≥50K (Excluded)', '<20K'], datasets: [{ data: [tier1.length, tier2.length, excludedTx.length, totalTx - tier1.length - tier2.length - excludedTx.length], backgroundColor: ['#3b82f6', '#8b5cf6', '#ef4444', '#6b7280'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } } });
+  charts.pwpTier = new Chart(document.getElementById('chartPwpTier').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['20K - <50K', '≥50K (Eligible)', '≥50K (Excluded)', '<20K'],
+      datasets: [{
+        data: [
+          tier1.length,
+          tier2.length,
+          excludedTx.length,
+          actualFilteredTx - tier1.length - tier2.length - excludedTx.length
+        ],
+        backgroundColor: ['#3b82f6', '#8b5cf6', '#ef4444', '#6b7280'],
+        borderWidth: 2,
+        borderColor: isDark ? '#1a2234' : '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: textColor, padding: 12 } }
+      }
+    }
+  });
+  
+  // Bar Chart: Perbandingan Nominal
   if (charts.pwpNominal) charts.pwpNominal.destroy();
-  charts.pwpNominal = new Chart(document.getElementById('chartPwpNominal').getContext('2d'), { type: 'bar', data: { labels: ['20K - <50K', '≥50K (Eligible)'], datasets: [{ data: [tier1Total, tier2Total], backgroundColor: ['rgba(59,130,246,0.6)', 'rgba(139,92,246,0.6)'], borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' } }, x: { ticks: { color: textColor } } } } });
+  charts.pwpNominal = new Chart(document.getElementById('chartPwpNominal').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['20K - <50K', '≥50K (Eligible)'],
+      datasets: [{
+        label: 'Total Nominal',
+        data: [tier1Total, tier2Total],
+        backgroundColor: ['rgba(59,130,246,0.6)', 'rgba(139,92,246,0.6)'],
+        borderColor: ['#3b82f6', '#8b5cf6'],
+        borderWidth: 2,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: textColor, callback: v => 'Rp '+(v/1000)+'k' },
+          grid: { color: gridColor }
+        },
+        x: {
+          ticks: { color: textColor },
+          grid: { display: false }
+        }
+      }
+    }
+  });
 }
 
+/* ============================================================
+   MODALS
+   ============================================================ */
 function showTxDetail(faktur) {
-  currentFakturModal = faktur; const tx = DATA.tsale.find(t => t.faktur === faktur); if (!tx) return;
+  currentFakturModal = faktur;
+  const tx = DATA.tsale.find(t => t.faktur === faktur);
+  if (!tx) return;
   document.getElementById('txModalFaktur').textContent = faktur;
   const items = DATA.trans.filter(t => t.faktur === faktur || t.bill_no === tx.faktur).sort((a,b) => (a.sort_no||0) - (b.sort_no||0));
-  let html = `<div class="row g-3 mb-3"><div class="col-md-6"><div class="stat-card"><div class="stat-label">Tanggal</div><div style="font-weight:600">${fmtDateTime(tx.date_tx, tx.time_tx)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Kasir</div><div style="font-weight:600">${escHtml(tx.user_id)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Total</div><div style="font-weight:700;font-size:20px;color:var(--accent-green)" class="text-money">${fmtRp(tx.total_faktur)}</div></div></div></div><h6 style="font-weight:700;margin:20px 0 12px"><i class="bi bi-box-seam-fill"></i> Item (${items.length})</h6><div style="background:var(--bg-secondary);border-radius:10px;padding:16px">`;
+  const usi = DATA.usi.find(u => u.faktur === faktur);
+  let html = `<div class="row g-3 mb-3"><div class="col-md-6"><div class="stat-card"><div class="stat-label">Tanggal</div><div style="font-weight:600">${fmtDateTime(tx.date_tx, tx.time_tx)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Kasir</div><div style="font-weight:600">${escHtml(tx.user_id)}</div></div></div>${usi && usi.member_name ? `<div class="col-md-6"><div class="stat-card"><div class="stat-label">Member</div><div style="font-weight:600">${escHtml(usi.member_name)}</div></div></div>` : ''}<div class="col-md-6"><div class="stat-card"><div class="stat-label">Total</div><div style="font-weight:700;font-size:20px;color:var(--accent-green)" class="text-money">${fmtRp(tx.total_faktur)}</div></div></div></div><h6 style="font-weight:700;margin:20px 0 12px"><i class="bi bi-box-seam-fill"></i> Item (${items.length})</h6><div style="background:var(--bg-secondary);border-radius:10px;padding:16px">`;
   let subtotal = 0;
-  items.forEach(it => { const qty = parseFloat(it.qty) || 0; const price = parseFloat(it.price) || 0; const lineTotal = qty * price; subtotal += lineTotal; const plu = String(it.plu); const name = DATA.pluNames[plu] || `PLU ${plu}`; html += `<div class="detail-item-row"><div><div class="detail-item-name">${escHtml(name)}</div><small style="color:var(--text-muted)">PLU: ${plu} • @ ${fmtRp(price)}</small></div><div class="detail-item-qty">× ${fmtNum(qty)}</div><div class="detail-item-price">${fmtRp(lineTotal)}</div></div>`; });
-  html += `</div><div style="margin-top:16px;padding:16px;background:var(--bg-secondary);border-radius:10px"><div style="display:flex;justify-content:space-between;padding:6px 0"><span>Subtotal</span><span class="text-money">${fmtRp(subtotal)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border-color);margin-top:8px;padding-top:12px;font-weight:700;font-size:16px"><span>TOTAL</span><span class="text-money" style="color:var(--accent-green)">${fmtRp(tx.total_faktur)}</span></div></div>`;
-  document.getElementById('txModalBody').innerHTML = html; new bootstrap.Modal(document.getElementById('txModal')).show();
+  items.forEach(it => {
+    const qty = parseFloat(it.qty) || 0; const price = parseFloat(it.price) || 0; const disc = parseFloat(it.disc) || 0;
+    const lineTotal = qty * price; subtotal += lineTotal;
+    const plu = String(it.plu); const name = DATA.pluNames[plu] || `PLU ${plu}`;
+    html += `<div class="detail-item-row"><div><div class="detail-item-name">${escHtml(name)}</div><small style="color:var(--text-muted)">PLU: ${plu} • @ ${fmtRp(price)}</small>${disc > 0 ? `<div><small class="badge-soft badge-orange">Diskon ${fmtRp(disc)}</small></div>` : ''}</div><div class="detail-item-qty">× ${fmtNum(qty)}</div><div class="detail-item-price">${fmtRp(lineTotal)}</div></div>`;
+  });
+  html += `</div><div style="margin-top:16px;padding:16px;background:var(--bg-secondary);border-radius:10px"><div style="display:flex;justify-content:space-between;padding:6px 0"><span>Subtotal</span><span class="text-money">${fmtRp(subtotal)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0"><span>Diskon</span><span class="text-money" style="color:var(--accent-orange)">-${fmtRp(tx.discount||0)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border-color);margin-top:8px;padding-top:12px;font-weight:700;font-size:16px"><span>TOTAL</span><span class="text-money" style="color:var(--accent-green)">${fmtRp(tx.total_faktur)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--text-muted)"><span>Tunai</span><span class="text-money">${fmtRp(tx.cash||0)}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--text-muted)"><span>Kembalian</span><span class="text-money">${fmtRp(tx.change_pay||0)}</span></div></div>`;
+  document.getElementById('txModalBody').innerHTML = html;
+  new bootstrap.Modal(document.getElementById('txModal')).show();
 }
-function showReceiptFromModal() { if (currentFakturModal) { bootstrap.Modal.getInstance(document.getElementById('txModal')).hide(); showReceipt(currentFakturModal); } }
+
+function showReceiptFromModal() {
+  if (currentFakturModal) { bootstrap.Modal.getInstance(document.getElementById('txModal')).hide(); showReceipt(currentFakturModal); }
+}
+
 function showReceipt(faktur) {
-  currentFakturModal = faktur; let r = DATA.receipt.find(x => x.faktur === faktur || x.bill_no === faktur);
-  if (r) { const content = [(r.header||''), (r.body1||''), (r.body2||''), (r.footer||'')].map(x => x.replace(/\|/g, '\n')).filter(x => x.trim()).join('\n'); document.getElementById('receiptContent').innerHTML = `<pre>${escHtml(content)}</pre>`; }
-  else { const tx = DATA.tsale.find(t => t.faktur === faktur); if (tx) { const items = DATA.trans.filter(t => t.faktur === faktur || t.bill_no === faktur); let text = `${DATA.storeName}\n${fmtDateTime(tx.date_tx, tx.time_tx)}\nKasir: ${tx.user_id}\nFaktur: ${faktur}\n\n--------------------------------\n`; items.forEach(it => { const plu = String(it.plu); const name = DATA.pluNames[plu] || `PLU ${plu}`; text += `${name.substring(0, 20).padEnd(20)}\n${parseFloat(it.qty)||0} x ${fmtRp(parseFloat(it.price)||0)}\n`; }); text += `\n--------------------------------\nTOTAL: ${fmtRp(tx.total_faktur)}\nTunai: ${fmtRp(tx.cash||0)}\nKembalian: ${fmtRp(tx.change_pay||0)}\n`; document.getElementById('receiptContent').innerHTML = `<pre>${escHtml(text)}</pre>`; } }
+  currentFakturModal = faktur;
+  let r = DATA.receipt.find(x => x.faktur === faktur || x.bill_no === faktur);
+  if (r) {
+    const header = (r.header || '').replace(/\|/g, '\n');
+    const body1 = (r.body1 || '').replace(/\|/g, '\n');
+    const body2 = (r.body2 || '').replace(/\|/g, '\n');
+    const body3 = (r.body3 || '').replace(/\|/g, '\n');
+    const addtl1 = (r.addtl1 || '').replace(/\|/g, '\n');
+    const addtl2 = (r.addtl2 || '').replace(/\|/g, '\n');
+    const addtl3 = (r.addtl3 || '').replace(/\|/g, '\n');
+    const footer = (r.footer || '').replace(/\|/g, '\n');
+    const content = [header, body1, body2, body3, addtl1, addtl2, addtl3, footer].filter(x => x.trim()).join('\n');
+    document.getElementById('receiptContent').innerHTML = `<pre>${escHtml(content)}</pre>`;
+  } else { generateReceiptFromTransaction(faktur); }
   new bootstrap.Modal(document.getElementById('receiptModal')).show();
 }
-function downloadReceiptAsImage() { html2canvas(document.getElementById('receiptContent'), { backgroundColor: '#ffffff', scale: 2 }).then(canvas => { const link = document.createElement('a'); link.download = `struk_${currentFakturModal || 'receipt'}_${Date.now()}.png`; link.href = canvas.toDataURL('image/png'); link.click(); }); }
-function showApiDetail(idx) { const filter = document.getElementById('apiModuleFilter').value; const list = filter ? DATA.connection.filter(c => c.module === filter) : DATA.connection; const c = list[idx]; if (!c) return; let req = c.str_request || ''; let res = c.str_response || ''; try { req = JSON.stringify(JSON.parse(req), null, 2); } catch(e){} try { res = JSON.stringify(JSON.parse(res), null, 2); } catch(e){} document.getElementById('apiModalBody').innerHTML = `<h6 style="font-weight:700;margin:16px 0 8px"><i class="bi bi-box-arrow-up"></i> Request</h6><pre style="background:var(--bg-secondary);padding:14px;border-radius:8px;font-size:11px;max-height:300px;overflow:auto;color:var(--text-primary)">${escHtml(req)}</pre><h6 style="font-weight:700;margin:16px 0 8px"><i class="bi bi-box-arrow-down"></i> Response</h6><pre style="background:var(--bg-secondary);padding:14px;border-radius:8px;font-size:11px;max-height:300px;overflow:auto;color:var(--text-primary)">${escHtml(res)}</pre>`; new bootstrap.Modal(document.getElementById('apiModal')).show(); }
-function exportCSV(type) { let csv = 'Faktur,Tanggal,Waktu,Kasir,Total,Cash,Kembalian,Topup,Qty Item\n'; FILTERED_TSALE.forEach(t => { csv += `"${t.faktur}","${t.date_tx}","${t.time_tx}","${t.user_id}",${t.total_faktur||0},${t.cash||0},${t.change_pay||0},${parseFloat(t.nom_topup)||0},${t.qty_pcs||0}\n`; }); const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `transactions_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url); }
 
-const pageTitles = { dashboard: ['Dashboard', 'Monitoring real-time'], transactions: ['Transaksi', 'Daftar transaksi'], products: ['Produk', 'Ranking produk'], cashiers: ['Kasir', 'Statistik kasir'], 'pwp-analysis': ['Analisis PWP', 'Segmentasi PWP'], payments: ['Pembayaran', 'Metode pembayaran'], monitoring: ['Monitoring Sync', 'Log sinkronisasi'], apilog: ['API Log', 'Log API'], report: ['Laporan', 'Ringkasan'], settings: ['Settings', 'Konfigurasi'], upload: ['Ganti Database', 'Upload baru'] };
-function showPage(page) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-' + page).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active'); const [title, sub] = pageTitles[page] || ['','']; document.getElementById('pageTitle').textContent = title; document.getElementById('pageSubtitle').textContent = sub; if (window.innerWidth < 992) { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display = 'none'; } }
-document.querySelectorAll('.nav-item').forEach(n => { n.addEventListener('click', () => { if (n.dataset.page) showPage(n.dataset.page); }); });
-function toggleSidebar() { const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay'); sidebar.classList.toggle('open'); overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none'; }
-function toggleTheme() { const current = document.body.getAttribute('data-theme'); setTheme(current === 'dark' ? 'light' : 'dark'); }
-function setTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); renderSettings(); if (FILTERED_TSALE.length > 0) { const stats = computeStats(); renderCharts(stats); renderReport(stats); renderPWPAnalysis(); } }
-function setupUpload(zoneId, inputId) { const zone = document.getElementById(zoneId); const input = document.getElementById(inputId); if (!zone || !input) return; zone.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') input.click(); }); zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); }); zone.addEventListener('dragleave', () => zone.classList.remove('dragover')); zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); if (e.dataTransfer.files.length) loadDatabase(e.dataTransfer.files[0]); }); input.addEventListener('change', e => { if (e.target.files.length) loadDatabase(e.target.files[0]); }); }
-
-async function initApp() {
-  try { SQLLib = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` }); document.getElementById('loadingScreen').style.display = 'none'; document.getElementById('uploadScreen').style.display = 'flex'; setupUpload('uploadZone', 'fileInput'); setupUpload('uploadZone2', 'fileInput2'); } catch (e) { document.getElementById('loadingScreen').innerHTML = `<div style="text-align:center;color:var(--accent-red)"><i class="bi bi-exclamation-triangle-fill" style="font-size:48px"></i><h5 style="margin-top:16px">Gagal memuat SQLite engine</h5><p style="color:var(--text-muted)">${e.message}</p><button class="btn btn-primary-custom" onclick="location.reload()">Reload</button></div>`; }
+function generateReceiptFromTransaction(faktur) {
+  const tx = DATA.tsale.find(t => t.faktur === faktur);
+  if (!tx) { alert('Transaksi tidak ditemukan!'); return; }
+  const items = DATA.trans.filter(t => t.faktur === faktur || t.bill_no === faktur).sort((a,b) => (a.sort_no||0) - (b.sort_no||0));
+  const usi = DATA.usi.find(u => u.faktur === faktur);
+  let receiptText = `${DATA.storeName}\n${DATA.storeId}\n${fmtDateTime(tx.date_tx, tx.time_tx)}\nKasir: ${tx.user_id}\nFaktur: ${faktur}\n\n--------------------------------\n`;
+  items.forEach(it => {
+    const qty = parseFloat(it.qty) || 0; const price = parseFloat(it.price) || 0;
+    const plu = String(it.plu); const name = DATA.pluNames[plu] || `PLU ${plu}`;
+    const lineTotal = qty * price;
+    receiptText += `${name.substring(0, 20).padEnd(20)}\n${qty} x ${fmtRp(price)} = ${fmtRp(lineTotal)}\n`;
+  });
+  receiptText += `\n--------------------------------\nTOTAL: ${fmtRp(tx.total_faktur)}\nTunai: ${fmtRp(tx.cash||0)}\nKembalian: ${fmtRp(tx.change_pay||0)}\n`;
+  if (usi && usi.member_name) receiptText += `\nMember: ${usi.member_name}\n`;
+  receiptText += `\n--------------------------------\nTerima kasih\nAtas kunjungannya\n`;
+  document.getElementById('receiptContent').innerHTML = `<pre>${escHtml(receiptText)}</pre>`;
 }
 
+function downloadReceiptAsImage() {
+  const receiptEl = document.getElementById('receiptContent');
+  html2canvas(receiptEl, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `struk_${currentFakturModal || 'receipt'}_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+function showApiDetail(idx, module) {
+  const filter = document.getElementById('apiModuleFilter').value;
+  const list = filter ? DATA.connection.filter(c => c.module === filter) : DATA.connection;
+  const c = list[idx]; if (!c) return;
+  let req = c.str_request || ''; let res = c.str_response || '';
+  try { req = JSON.stringify(JSON.parse(req), null, 2); } catch(e){}
+  try { res = JSON.stringify(JSON.parse(res), null, 2); } catch(e){}
+  document.getElementById('apiModalBody').innerHTML = `<div class="row g-3 mb-3"><div class="col-md-6"><div class="stat-card"><div class="stat-label">Module</div><div style="font-weight:600">${escHtml(c.module)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Process</div><div style="font-weight:600">${escHtml(c.process)}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Faktur</div><div style="font-weight:600" class="mono">${escHtml(c.faktur_tx||'-')}</div></div></div><div class="col-md-6"><div class="stat-card"><div class="stat-label">Status</div><div style="font-weight:600"><span class="badge-soft ${c.status==='TRUE'?'badge-green':'badge-red'}">${escHtml(c.status)}</span></div></div></div></div><h6 style="font-weight:700;margin:16px 0 8px"><i class="bi bi-box-arrow-up"></i> Request</h6><pre style="background:var(--bg-secondary);padding:14px;border-radius:8px;font-size:11px;max-height:300px;overflow:auto;color:var(--text-primary)">${escHtml(req)}</pre><h6 style="font-weight:700;margin:16px 0 8px"><i class="bi bi-box-arrow-down"></i> Response</h6><pre style="background:var(--bg-secondary);padding:14px;border-radius:8px;font-size:11px;max-height:300px;overflow:auto;color:var(--text-primary)">${escHtml(res)}</pre>`;
+  new bootstrap.Modal(document.getElementById('apiModal')).show();
+}
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+function exportCSV(type) {
+  let csv = '';
+  if (type === 'tx') {
+    csv = 'Faktur,Tanggal,Waktu,Kasir,Total,Cash,Kembalian,Topup,Qty Item\n';
+    const date = document.getElementById('dateFilter').value;
+    const fakturs = getValidFakturs(date);
+    DATA.tsale.filter(t => fakturs.has(t.faktur) || fakturs.has(t.bill_no)).forEach(t => { 
+      csv += `"${t.faktur}","${t.date_tx}","${t.time_tx}","${t.user_id}",${t.total_faktur||0},${t.cash||0},${t.change_pay||0},${parseFloat(t.nom_topup)||0},${t.qty_pcs||0}\n`; 
+    });
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `transactions_${Date.now()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+const pageTitles = {
+  dashboard: ['Dashboard', 'Monitoring real-time aktivitas toko'],
+  transactions: ['Transaksi', 'Daftar seluruh transaksi penjualan'],
+  products: ['Produk', 'Ranking dan analisis produk'],
+  cashiers: ['Kasir', 'Statistik dan aktivitas kasir'],
+  'pwp-analysis': ['Analisis PWP', 'Segmentasi transaksi untuk program Promo With Purchase'],
+  payments: ['Pembayaran', 'Analisis metode pembayaran'],
+  monitoring: ['Monitoring Sync', 'Status sinkronisasi transaksi'],
+  apilog: ['API Log', 'Log koneksi API POS'],
+  report: ['Laporan', 'Ringkasan dan analisis lengkap'],
+  settings: ['Settings', 'Konfigurasi dashboard'],
+  upload: ['Ganti Database', 'Upload database SQLite baru']
+};
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+  const [title, sub] = pageTitles[page] || ['',''];
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('pageSubtitle').textContent = sub;
+  if (window.innerWidth < 992) { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display = 'none'; }
+}
+
+document.querySelectorAll('.nav-item').forEach(n => { n.addEventListener('click', () => showPage(n.dataset.page)); });
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function toggleTheme() { const current = document.body.getAttribute('data-theme'); setTheme(current === 'dark' ? 'light' : 'dark'); }
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  renderSettings();
+  if (DATA.tsale.length > 0) { const stats = computeStats(); renderCharts(stats); renderReport(stats); renderPWPAnalysis(); }
+}
+
+/* ============================================================
+   FILE UPLOAD HANDLING
+   ============================================================ */
+function setupUpload(zoneId, inputId) {
+  const zone = document.getElementById(zoneId); const input = document.getElementById(inputId);
+  if (!zone || !input) return;
+  zone.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') input.click(); });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); if (e.dataTransfer.files.length) loadDatabase(e.dataTransfer.files[0]); });
+  input.addEventListener('change', e => { if (e.target.files.length) loadDatabase(e.target.files[0]); });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function initApp() {
+  try {
+    SQLLib = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('uploadScreen').style.display = 'flex';
+    setupUpload('uploadZone', 'fileInput');
+    setupUpload('uploadZone2', 'fileInput2');
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loadingScreen').innerHTML = `<div style="text-align:center;color:var(--accent-red)"><i class="bi bi-exclamation-triangle-fill" style="font-size:48px"></i><h5 style="margin-top:16px">Gagal memuat SQLite engine</h5><p style="color:var(--text-muted)">${e.message}</p><button class="btn btn-primary-custom" onclick="location.reload()">Reload</button></div>`;
+  }
+}
+
+// Event Listener untuk Filter Tanggal
+document.getElementById('dateFilter').addEventListener('change', renderAll);
+
 window.addEventListener('DOMContentLoaded', async () => {
-  const savedTheme = localStorage.getItem('theme') || 'dark'; document.body.setAttribute('data-theme', savedTheme);
-  const authResult = await checkAuth(); if (!authResult) return;
-  document.getElementById('loadingScreen').style.display = 'flex'; await initApp(); startAutoVerify();
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.body.setAttribute('data-theme', savedTheme);
+  
+  const authResult = await checkAuth();
+  if (!authResult) return;
+  
+  document.getElementById('loadingScreen').style.display = 'flex';
+  await initApp();
+  
+  startAutoVerify();
 });
 </script>
 </body>
