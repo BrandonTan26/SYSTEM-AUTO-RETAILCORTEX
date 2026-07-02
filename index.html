@@ -190,6 +190,20 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 .login-spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
 .btn-login.loading .login-spinner { display: inline-block; }
 .btn-login.loading .btn-text { display: none; }
+
+/* ✅ DEVICE LIMIT SCREEN STYLES */
+.device-limit-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #78350f 0%, #f59e0b 50%, #d97706 100%); display: none; align-items: center; justify-content: center; z-index: 10002; padding: 20px; }
+.device-limit-screen.show { display: flex; }
+.device-limit-box { background: white; border-radius: 20px; padding: 40px; width: 90%; max-width: 480px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+.device-limit-box .device-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 40px; margin-bottom: 20px; }
+.device-limit-box h2 { color: #1e293b; margin: 0 0 12px 0; font-weight: 800; }
+.device-limit-box p { color: #64748b; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; }
+.device-limit-box .device-detail { background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #92400e; text-align: left; }
+.device-limit-box .device-detail code { background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px; font-size: 11px; word-break: break-all; display: block; margin-top: 8px; }
+.device-limit-box .contact-info { background: #f1f5f9; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #475569; }
+.device-limit-box .contact-info strong { color: #1e293b; display: block; margin-bottom: 8px; }
+.device-limit-box .contact-info a { color: #25d366; text-decoration: none; font-weight: 700; }
+.device-limit-box .contact-info a:hover { text-decoration: underline; }
 </style>
 </head>
 <body data-theme="dark">
@@ -218,6 +232,32 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
     <p id="expiredMessage">Masa sewa Anda telah habis atau akun dinonaktifkan.</p>
     <div class="expired-detail"><i class="bi bi-info-circle-fill"></i> Silakan hubungi admin untuk perpanjangan sewa.</div>
     <div class="contact-info"><strong>📞 Hubungi Admin:</strong><br><span>WhatsApp: 0812-XXXX-XXXX</span></div>
+    <button class="btn-login" onclick="backToLogin()" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="bi bi-arrow-left"></i> Kembali ke Login</button>
+  </div>
+</div>
+
+<!-- ✅ DEVICE LIMIT SCREEN (BARU) -->
+<div id="deviceLimitScreen" class="device-limit-screen">
+  <div class="device-limit-box">
+    <div class="device-icon"><i class="bi bi-phone-fill"></i></div>
+    <h2>Device Limit Tercapai</h2>
+    <p id="deviceLimitMessage">Akun ini sudah digunakan di <strong>4 device</strong> (maksimal 4).</p>
+    <div class="device-detail">
+      <i class="bi bi-info-circle-fill"></i> <strong>Device ID Anda:</strong>
+      <code id="deviceLimitId">-</code>
+      <div style="margin-top:10px;font-size:12px;color:#92400e">
+        <i class="bi bi-shield-exclamation"></i> Screenshot kode di atas dan kirim ke admin untuk aktivasi device baru.
+      </div>
+    </div>
+    <div class="contact-info">
+      <strong>📞 Hubungi Admin untuk Aktivasi:</strong>
+      <a id="waLink" href="#" target="_blank">
+        <i class="bi bi-whatsapp"></i> Chat WhatsApp Admin (0812-XXXX-XXXX)
+      </a>
+      <div style="margin-top:8px;font-size:11px;color:#64748b">
+        Klik link di atas untuk langsung chat admin
+      </div>
+    </div>
     <button class="btn-login" onclick="backToLogin()" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="bi bi-arrow-left"></i> Kembali ke Login</button>
   </div>
 </div>
@@ -546,10 +586,80 @@ body { background: var(--bg-primary); color: var(--text-primary); font-family: '
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjMdpDjGG7OaNbUQdbyroKOx14Z6KxhSu9Z_cw6WsYG6PbFtvGI3fbad2-O6tT9P1Zng/exec';
 
+// ✅ KONFIGURASI WHATSAPP ADMIN (GANTI NOMOR INI!)
+const ADMIN_WA_NUMBER = '6281234567890'; // Format internasional tanpa +
+const ADMIN_WA_DISPLAY = '0812-XXXX-XXXX'; // Format tampilan
+
 let DB = null, SQLLib = null;
 let DATA = { tsale: [], trans: [], wallet: [], card: [], receipt: [], cashier: [], login: [], sync: [], connection: [], usi: [], pluNames: {}, storeId: '2L44', storeName: 'STORE', detailTableInfo: null, masterProductInfo: null };
 let FILTERED_TSALE = [], FILTERED_TRANS = [], FILTERED_WALLET = [], FILTERED_CARD = [];
 let currentFakturModal = null, charts = {};
+
+// ==========================================
+// ✅ DEVICE FINGERPRINT (BARU)
+// ==========================================
+function generateDeviceId() {
+  var savedId = localStorage.getItem('deviceId');
+  if (savedId) return savedId;
+  
+  var fingerprint = [];
+  fingerprint.push(navigator.userAgent || 'unknown');
+  fingerprint.push(screen.width + 'x' + screen.height);
+  fingerprint.push(screen.colorDepth || 'unknown');
+  fingerprint.push(navigator.language || 'unknown');
+  try { fingerprint.push(Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown'); } catch(e) { fingerprint.push('unknown'); }
+  fingerprint.push(navigator.platform || 'unknown');
+  
+  try {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    ctx.textBaseline = "top";
+    ctx.font = "14px 'Arial'";
+    ctx.fillStyle = "#f60";
+    ctx.fillRect(125,1,62,20);
+    ctx.fillStyle = "#069";
+    ctx.fillText("DeviceID", 2, 15);
+    fingerprint.push(canvas.toDataURL());
+  } catch(e) { fingerprint.push('no-canvas'); }
+  
+  var raw = fingerprint.join('|||');
+  var hash = 0;
+  for (var i = 0; i < raw.length; i++) {
+    var char = raw.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  
+  var deviceId = 'DEV_' + Math.abs(hash).toString(36).toUpperCase() + '_' + Date.now().toString(36).toUpperCase();
+  localStorage.setItem('deviceId', deviceId);
+  return deviceId;
+}
+
+// ==========================================
+// ✅ SHOW DEVICE LIMIT SCREEN (BARU)
+// ==========================================
+function showDeviceLimitScreen(currentCount, maxDevices) {
+  var deviceId = localStorage.getItem('deviceId') || 'unknown';
+  var kodeToko = document.getElementById('kodeToko').value.trim();
+  
+  document.getElementById('deviceLimitMessage').innerHTML = 
+    'Akun ini sudah digunakan di <strong>' + currentCount + ' device</strong> (maksimal ' + maxDevices + ').<br>' +
+    '<small style="color:#64748b">Hubungi admin untuk menambahkan device baru atau reset device lama.</small>';
+  
+  document.getElementById('deviceLimitId').textContent = deviceId;
+  
+  var waMessage = encodeURIComponent(
+    'Halo Admin, saya mau minta akses device baru untuk dashboard.\n\n' +
+    'Kode Toko: ' + kodeToko + '\n' +
+    'Device ID: ' + deviceId + '\n\n' +
+    'Mohon bantuannya untuk aktivasi. Terima kasih!'
+  );
+  document.getElementById('waLink').href = 'https://wa.me/' + ADMIN_WA_NUMBER + '?text=' + waMessage;
+  document.getElementById('waLink').innerHTML = '<i class="bi bi-whatsapp"></i> Chat WhatsApp Admin (' + ADMIN_WA_DISPLAY + ')';
+  
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('deviceLimitScreen').classList.add('show');
+}
 
 async function handleLogin(e) {
   e.preventDefault();
@@ -559,22 +669,64 @@ async function handleLogin(e) {
   const errorBox = document.getElementById('loginError');
   const errorText = document.getElementById('loginErrorText');
   errorBox.classList.remove('show');
+  
+  // ✅ Generate Device ID
+  const deviceId = generateDeviceId();
+  
   btnLogin.classList.add('loading'); btnLogin.disabled = true;
   try {
-    const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'login', kode_toko: kodeToko, pin: pin }) });
+    const response = await fetch(APPS_SCRIPT_URL, { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+      body: JSON.stringify({ 
+        action: 'login', 
+        kode_toko: kodeToko, 
+        pin: pin,
+        device_id: deviceId
+      }) 
+    });
     const result = await response.json();
     if (result.status === 'success') {
-      sessionStorage.setItem('loggedIn', 'true'); sessionStorage.setItem('kodeToko', result.kode_toko); sessionStorage.setItem('masaBerlaku', result.masa_berlaku);
-      document.getElementById('welcomeKode').textContent = result.kode_toko; document.getElementById('welcomeExpiry').textContent = result.masa_berlaku;
-      document.getElementById('loginScreen').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'flex'; initApp();
-    } else { throw new Error(result.message || 'Login gagal'); }
+      sessionStorage.setItem('loggedIn', 'true'); 
+      sessionStorage.setItem('kodeToko', result.kode_toko); 
+      sessionStorage.setItem('masaBerlaku', result.masa_berlaku);
+      sessionStorage.setItem('deviceId', deviceId);
+      document.getElementById('welcomeKode').textContent = result.kode_toko; 
+      document.getElementById('welcomeExpiry').textContent = result.masa_berlaku;
+      document.getElementById('loginScreen').style.display = 'none'; 
+      document.getElementById('loadingScreen').style.display = 'flex'; 
+      initApp();
+    } else {
+      // ✅ Cek apakah error karena device limit
+      if (result.message === 'DEVICE_LIMIT_EXCEEDED') {
+        showDeviceLimitScreen(result.device_count, result.max_devices);
+      } else {
+        throw new Error(result.message || 'Login gagal');
+      }
+    }
   } catch (error) {
     const msg = error.message || 'Kode Toko atau PIN salah!';
-    if (msg.includes('HABIS') || msg.includes('dinonaktifkan') || msg.includes('Off')) { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('expiredMessage').textContent = msg; document.getElementById('expiredScreen').classList.add('show'); }
-    else { errorText.textContent = msg; errorBox.classList.add('show'); }
-  } finally { btnLogin.classList.remove('loading'); btnLogin.disabled = false; }
+    if (msg.includes('HABIS') || msg.includes('dinonaktifkan') || msg.includes('Off')) { 
+      document.getElementById('loginScreen').style.display = 'none'; 
+      document.getElementById('expiredMessage').textContent = msg; 
+      document.getElementById('expiredScreen').classList.add('show'); 
+    } else { 
+      errorText.textContent = msg; 
+      errorBox.classList.add('show'); 
+    }
+  } finally { 
+    btnLogin.classList.remove('loading'); 
+    btnLogin.disabled = false; 
+  }
 }
-function backToLogin() { document.getElementById('expiredScreen').classList.remove('show'); document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('loginError').classList.remove('show'); document.getElementById('kodeToko').value = ''; document.getElementById('pin').value = ''; }
+function backToLogin() { 
+  document.getElementById('expiredScreen').classList.remove('show'); 
+  document.getElementById('deviceLimitScreen').classList.remove('show'); 
+  document.getElementById('loginScreen').style.display = 'flex'; 
+  document.getElementById('loginError').classList.remove('show'); 
+  document.getElementById('kodeToko').value = ''; 
+  document.getElementById('pin').value = ''; 
+}
 function doLogout() { if (confirm('Yakin ingin logout?')) { sessionStorage.clear(); location.reload(); } }
 
 async function verifySession(kodeToko) {
@@ -651,14 +803,10 @@ function detectDetailTable() {
   return { table: 'tx_trans', pluCol: 'plu', qtyCol: 'qty', priceCol: 'price', fakturCol: 'bill_no', subtotalCol: null };
 }
 
-// ✅ SCAN SEMUA TABEL UNTUK CARI MASTER PRODUK
 function detectMasterProduct() {
   let tables;
   try { tables = queryAll("SELECT name FROM sqlite_master WHERE type='table'").map(t => t.name); } catch(e) { return null; }
-  
-  // Kandidat standar dulu
   const masterCandidates = ['m_product', 'm_products', 'products', 'product', 'm_item', 'item', 'master_product', 'master_produk', 'm_plu', 'm_plu_name', 'm_barang', 'log_promo_result_plu', 'log_promo_syarat_plu'];
-  
   for (const candidate of masterCandidates) {
     if (tables.includes(candidate)) {
       let cols;
@@ -672,8 +820,6 @@ function detectMasterProduct() {
       }
     }
   }
-  
-  // Fallback: scan semua tabel
   console.log('️ Standard master not found, scanning all tables...');
   for (const table of tables) {
     if (table === 'tx_tsale' || table === 'tx_trans' || table.startsWith('log_') && !table.includes('plu')) continue;
@@ -687,7 +833,6 @@ function detectMasterProduct() {
       return { table: table, pluCol: cols[pluIdx], nameCol: cols[nameIdx] };
     }
   }
-  
   console.log('❌ No master product table found');
   return null;
 }
@@ -696,7 +841,6 @@ async function extractData() {
   DATA.tsale = queryAll('SELECT * FROM tx_tsale');
   DATA.detailTableInfo = detectDetailTable();
   DATA.masterProductInfo = detectMasterProduct();
-  
   try { DATA.trans = queryAll(`SELECT * FROM ${DATA.detailTableInfo.table}`); } catch(e) { DATA.trans = []; }
   DATA.wallet = queryAll('SELECT * FROM tx_tsale_wallet');
   DATA.card = queryAll('SELECT * FROM tx_tsale_card');
@@ -709,7 +853,6 @@ async function extractData() {
   const appInfo = queryAll('SELECT * FROM log_app_info LIMIT 1');
   if (appInfo.length) DATA.storeId = appInfo[0].store_id || '2L44';
   if (DATA.usi.length && DATA.usi[0].store_name) DATA.storeName = DATA.usi[0].store_name.replace(/\[.*\]/, '').trim();
-  
   const dti = DATA.detailTableInfo;
   DATA.trans.forEach(t => {
     if (dti.fakturCol === 'bill_no' && t.bill_no) { t.faktur = t.bill_no; }
@@ -719,12 +862,8 @@ async function extractData() {
     if (dti.priceCol && dti.priceCol !== 'price') { if (t.price === undefined && t[dti.priceCol] !== undefined) t.price = t[dti.priceCol]; }
     if (dti.subtotalCol && dti.subtotalCol !== 'subtotal') { if (t.subtotal === undefined && t[dti.subtotalCol] !== undefined) t.subtotal = t[dti.subtotalCol]; }
   });
-  
-  // ✅ EXTRACT NAMA PRODUK DARI MASTER TABLE + RECEIPT
   extractPluNames();
-  
   console.log(' Total pluNames loaded:', Object.keys(DATA.pluNames).length);
-  
   const dates = [...new Set(DATA.tsale.map(t => t.date_tx).filter(Boolean))].sort().reverse();
   const dateSelect = document.getElementById('dateFilter');
   dateSelect.innerHTML = '<option value="">Semua Tanggal</option>' + dates.map(d => `<option value="${d}">${d}</option>`).join('');
@@ -745,11 +884,8 @@ function updateFilteredData() {
 }
 document.getElementById('dateFilter').addEventListener('change', () => { updateFilteredData(); renderAll(); });
 
-// ✅ EXTRACT NAMA PRODUK DARI MASTER TABLE + RECEIPT
 function extractPluNames() {
   DATA.pluNames = {};
-  
-  // 1. Dari master product table
   if (DATA.masterProductInfo) {
     try {
       const masterData = queryAll(`SELECT ${DATA.masterProductInfo.pluCol} as plu, ${DATA.masterProductInfo.nameCol} as name FROM ${DATA.masterProductInfo.table}`);
@@ -762,8 +898,6 @@ function extractPluNames() {
       console.log(`✅ Loaded ${Object.keys(DATA.pluNames).length} names from master table: ${DATA.masterProductInfo.table}`);
     } catch(e) { console.error('Error loading master product:', e); }
   }
-  
-  // 2. Dari receipt parsing (fallback)
   const receiptByFaktur = {};
   DATA.receipt.forEach(r => { 
     const faktur = r.faktur || r.bill_no; 
@@ -777,7 +911,6 @@ function extractPluNames() {
     if (!transByBill[b]) transByBill[b] = []; 
     transByBill[b].push(t); 
   });
-  
   let receiptCount = 0;
   Object.keys(transByBill).forEach(billNo => {
     const lines = receiptByFaktur[billNo] || [];
@@ -821,7 +954,6 @@ function computeStats() {
   return { sales, qtyMember, salesMember, uangFisik, totalCash, totalChange, totalTopup, totalWallet, totalCard, cashierIds, dataDate, totalTx: tx.length, totalItem: tx.reduce((s,t) => s + (t.qty_pcs||0), 0) };
 }
 
-// ✅ RANKING PRODUK - NAMA DARI tx_trans ATAU pluNames
 function computeProducts() {
   console.log('=== DEBUG TX_TRANS ===');
   console.log('Total records:', DATA.trans.length);
@@ -842,7 +974,6 @@ function computeProducts() {
     const subtotal = qty * price;
 
     if (!map[plu]) {
-      // ✅ PRIORITAS NAMA: tx_trans fields -> pluNames (master/receipt) -> fallback
       const nameFromTx = t.item_desc || t.nama_barang || t.description || t.desc_plu || t.nm_plu || t.product_name;
       const nameFromMaster = DATA.pluNames[plu];
       const finalName = nameFromTx || nameFromMaster || ('PLU ' + plu);
@@ -976,7 +1107,6 @@ function renderTransactions() {
   document.getElementById('txSearch').oninput = e => { const q = e.target.value.toLowerCase(); tbody.querySelectorAll('tr').forEach(tr => { tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'; }); };
 }
 
-// ✅ RENDER PRODUK RANK
 function renderProducts() {
   const products = computeProducts();
 
